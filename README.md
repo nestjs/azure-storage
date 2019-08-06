@@ -47,14 +47,17 @@ $ nest add @nestjs/azure-storage
 You can pass additional flags to customize the post-install schematic. For example, if your base application directory is different than `src`, use `--rootDir` flag:
 
 ```bash
-$ nest add @nestjs/azure-storage --rootDir app
+$ nest add @nestjs/azure-storage
 ```
 
 Other available flags:
 
 - `rootModuleFileName` - the name of the root module file, default: `app.module`
 - `rootModuleClassName` - the name of the root module class, default: `AppModule`
+- `mainFileName` - Application main file, default: `main`
 - `skipInstall` - skip installing dependencies, default: `false`
+- `storageAccountName` (required) - The Azure Storage account name (see: http://bit.ly/azure-storage-account)
+- `storageAccountSAS` (required) - The Azure Storage SAS Key (see: http://bit.ly/azure-storage-sas-key).
 
 ## Support
 
