@@ -1,5 +1,5 @@
 import { normalize } from '@angular-devkit/core';
-import { red, green } from '@angular-devkit/core/src/terminal';
+import { green, red } from '@angular-devkit/core/src/terminal';
 import {
   Rule,
   SchematicContext,
@@ -15,11 +15,23 @@ export function addDotEnvConfig(options: AzureOptions): Rule {
   return (tree: Tree, context: SchematicContext) => {
     const envPath = normalize('/.env');
 
+    
+    if (options.storageAccountName === '' || options.storageAccountSAS === '') {
+      if (options.storageAccountName === '') {
+        context.logger.error('storageAccountName can not be empty.')
+      }
+      if (options.storageAccountSAS === '') {
+        context.logger.error('storageAccountSAS can not be empty.')
+      }
+      process.exit(1);
+      return null;
+    }
+
     // environment vars to add to .env file
     const newEnvFileContent =
-      `# See: http://bit.ly/azure-storage-account\n` +
-      `AZURE_STORAGE_SAS_KEY=${options.storageAccountSAS}\n` +
       `# See: http://bit.ly/azure-storage-sas-key\n` +
+      `AZURE_STORAGE_SAS_KEY=${options.storageAccountSAS}\n` +
+      `# See: http://bit.ly/azure-storage-account\n` +
       `AZURE_STORAGE_ACCOUNT=${options.storageAccountName}\n`;
 
     const oldEnvFileContent = readEnvFile(tree, envPath);
@@ -75,7 +87,7 @@ export function addDotEnvCall(options: AzureOptions): Rule {
 
       if (mainContent.includes(`require('dotenv')`)) {
         return context.logger.warn(
-          `Skipping dotenv configuration because there seem to be already ` +
+          `>> Skipping dotenv configuration because there is already ` +
             `a call to require('dotenv') in "${mainFilePath}".`,
         );
       } else {
@@ -83,7 +95,9 @@ export function addDotEnvCall(options: AzureOptions): Rule {
         tree.overwrite(mainFilePath, [dotEnvContent, mainContent].join('\n'));
       }
     } else {
-      new SchematicsException('');
+      throw new SchematicsException(
+        `Could not locate "${mainFilePath}". Make sure to provide the correct --mainFileName argument.`,
+      );
     }
     return tree;
   };

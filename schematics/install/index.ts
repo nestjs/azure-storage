@@ -13,6 +13,10 @@ import {
 import { Schema as AzureOptions } from './schema';
 import { addDotEnvCall, addDotEnvConfig } from './src/add-env-config';
 import { addAzureStorageModuleToImports } from './src/add-module';
+import { updateGitIgnore } from './src/update-git-ignore';
+
+import {registerOnExit} from './utils/register-clean-exit';
+registerOnExit();
 
 function addDependenciesAndScripts(): Rule {
   return (host: Tree) => {
@@ -51,6 +55,7 @@ export default function(options: AzureOptions): Rule {
           addDependenciesAndScripts(),
           addDotEnvConfig(options),
           addDotEnvCall(options),
+          updateGitIgnore(options),
           addAzureStorageModuleToImports(options),
         ]),
       ),

@@ -8,9 +8,19 @@ const AZURE_STORAGE_ACCOUNT = 'AZURE_STORAGE_ACCOUNT';
 function addDotEnvConfig(options) {
     return (tree, context) => {
         const envPath = core_1.normalize('/.env');
-        const newEnvFileContent = `# See: http://bit.ly/azure-storage-account\n` +
+        if (options.storageAccountName === '' || options.storageAccountSAS === '') {
+            if (options.storageAccountName === '') {
+                context.logger.error('storageAccountName can not be empty.');
+            }
+            if (options.storageAccountSAS === '') {
+                context.logger.error('storageAccountSAS can not be empty.');
+            }
+            process.exit(1);
+            return null;
+        }
+        const newEnvFileContent = `# See: http://bit.ly/azure-storage-sas-key\n` +
             `AZURE_STORAGE_SAS_KEY=${options.storageAccountSAS}\n` +
-            `# See: http://bit.ly/azure-storage-sas-key\n` +
+            `# See: http://bit.ly/azure-storage-account\n` +
             `AZURE_STORAGE_ACCOUNT=${options.storageAccountName}\n`;
         const oldEnvFileContent = readEnvFile(tree, envPath);
         if (!oldEnvFileContent) {
@@ -48,7 +58,7 @@ function addDotEnvCall(options) {
         if (content) {
             const mainContent = content.toString('utf-8');
             if (mainContent.includes(`require('dotenv')`)) {
-                return context.logger.warn(`Skipping dotenv configuration because there seem to be already ` +
+                return context.logger.warn(`>> Skipping dotenv configuration because there is already ` +
                     `a call to require('dotenv') in "${mainFilePath}".`);
             }
             else {
@@ -57,7 +67,7 @@ function addDotEnvCall(options) {
             }
         }
         else {
-            new schematics_1.SchematicsException('');
+            throw new schematics_1.SchematicsException(`Could not locate "${mainFilePath}". Make sure to provide the correct --mainFileName argument.`);
         }
         return tree;
     };

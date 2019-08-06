@@ -28,8 +28,8 @@ export function addAzureStorageModuleToImports(options: AzureOptions): Rule {
 
     // verify module has not already been imported
     if (hasNestModuleImport(tree, appModulePath, MODULE_WITH_CONFIG)) {
-      return console.warn(
-        `Skiping importing "AzureStorageModule.withConfig()" because it is already imported in "${appModulePath}".`,
+      return context.logger.warn(
+        `>> Skiping importing "AzureStorageModule.withConfig()" because it is already imported in "${appModulePath}".`,
       );
     }
 
