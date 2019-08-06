@@ -11,6 +11,17 @@ import { Schema as AzureOptions } from '../schema';
 const AZURE_STORAGE_SAS_KEY = 'AZURE_STORAGE_SAS_KEY';
 const AZURE_STORAGE_ACCOUNT = 'AZURE_STORAGE_ACCOUNT';
 
+/**
+ * This will create or update the `.env` file with the `AZURE_STORAGE_ACCOUNT` and `AZURE_STORAGE_SAS_KEY` values.
+ * 
+ * @example
+ * ```
+ * AZURE_STORAGE_SAS_KEY=this-is-the-sas-key-value
+ * AZURE_STORAGE_ACCOUNT=this-is-the-storage-account-value
+ * ```
+ * 
+ * @param options The Azure arguments provided to this schematic.
+ */
 export function addDotEnvConfig(options: AzureOptions): Rule {
   return (tree: Tree, context: SchematicContext) => {
     const envPath = normalize('/.env');
@@ -77,6 +88,16 @@ function readEnvFile(host: Tree, fileName: string): string {
   return buffer ? buffer.toString('utf-8') : null;
 }
 
+/**
+ * This rule is responsible for adding the `require('dotenv').config()` to the main.ts file.
+ * The call will be added to the top of the file before any other call.
+ * 
+ * @example
+ * ```
+ * if (process.env.NODE_ENV !== 'production') require('dotenv').config();
+ * ```
+ * @param options The Azure arguments provided to this schematic.
+ */
 export function addDotEnvCall(options: AzureOptions): Rule {
   return (tree: Tree, context: SchematicContext) => {
     const mainFilePath = `${options.rootDir}/${options.mainFileName}.ts`;

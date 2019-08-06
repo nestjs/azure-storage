@@ -9,7 +9,7 @@
 /**
  * The content of this file was adjusted based on: https://github.com/angular/angular-cli/blob/master/packages/schematics/angular/utility/ast-utils.ts
  * These changes were necessary to make the schematics API work with the NestJS framerwork.
- * 
+ *
  * @author Wassim Chegham <wassim.dev>
  */
 
@@ -19,6 +19,24 @@ import { Schema as AzureOptions } from '../schema';
 import { addModuleImportToRootModule } from '../utils/ast';
 import { hasNestModuleImport } from '../utils/nest-module-import';
 
+/**
+ * Add the AzureStorageModule.withConfig(...) configuration to the main Nest module.
+ * This will both import the `AzureStorageModule` from the `@nestjs/azure-storage` package and
+ * add the `AzureStorageModule.withConfig(...)` to the `imports` entry of the main Nest Module.
+ *
+ * @example
+ * ```
+ * imports: [
+ *    AzureStorageModule.withConfig({
+ *     sasKey: process.env['AZURE_STORAGE_SAS_KEY'],
+ *    accountName: process.env['AZURE_STORAGE_ACCOUNT'],
+ *   containerName: 'nest-demo-container',
+ *    }),
+ *  ],
+ * ```
+ *
+ * @param options The Azure arguments provided to this schematic.
+ */
 export function addAzureStorageModuleToImports(options: AzureOptions): Rule {
   return (tree: Tree, context: SchematicContext) => {
     const MODULE_WITH_CONFIG = `AzureStorageModule.withConfig({sasKey: process.env['AZURE_STORAGE_SAS_KEY'], accountName: process.env['AZURE_STORAGE_ACCOUNT'], containerName: 'nest-demo-container' })`;
