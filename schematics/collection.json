@@ -1,8 +1,8 @@
 {
   "$schema": "../node_modules/@angular-devkit/schematics/collection-schema.json",
   "schematics": {
-    "azure-storage": {
-      "description": "Adds Azure Storage support to the application",
+    "nest-add": {
+      "description": "Adds Azure Storage support to the NestJS application",
       "factory": "./install",
       "schema": "./install/schema.json",
       "aliases": ["az-storage"]

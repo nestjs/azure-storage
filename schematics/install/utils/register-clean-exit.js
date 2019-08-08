@@ -7,7 +7,6 @@ function registerOnExit() {
             console.log('Aborting.');
         }
         if (exitCode || exitCode === 0) {
-            console.log('Done.');
         }
         if (options.exit) {
             process.exit();
