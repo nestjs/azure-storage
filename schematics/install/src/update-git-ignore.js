@@ -4,7 +4,7 @@ function updateGitIgnore(options) {
     return (tree, context) => {
         const gitIgnorePath = `.gitignore`;
         const content = tree.read(gitIgnorePath);
-        const gitIgnoreNewContent = `\n.env\n\n.env.*\n`;
+        const gitIgnoreNewContent = `.env\n.env.*\n`;
         if (content) {
             const gitIgnoreContent = content.toString('utf-8');
             if (gitIgnoreContent.includes(`.env`)) {

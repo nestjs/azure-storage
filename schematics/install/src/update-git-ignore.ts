@@ -12,7 +12,7 @@ export function updateGitIgnore(options: AzureOptions): Rule {
   return (tree: Tree, context: SchematicContext) => {
     const gitIgnorePath = `.gitignore`;
     const content: Buffer | null = tree.read(gitIgnorePath);
-    const gitIgnoreNewContent = `\n.env\n\n.env.*\n`;
+    const gitIgnoreNewContent = `.env\n.env.*\n`;
 
     if (content) {
       const gitIgnoreContent = content.toString('utf-8');
