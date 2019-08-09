@@ -4,7 +4,6 @@ process.stdin.resume();
 function registerOnExit() {
     function exitHandler(options, exitCode) {
         if (options.cleanup) {
-            console.log('Aborting.');
         }
         if (exitCode || exitCode === 0) {
         }

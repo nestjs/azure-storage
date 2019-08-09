@@ -8,7 +8,6 @@ interface ProcessOptions {
 export function registerOnExit() {
   function exitHandler(options: ProcessOptions, exitCode: number) {
     if (options.cleanup) {
-      console.log('Aborting.');
     }
     if (exitCode || exitCode === 0) {
     }
