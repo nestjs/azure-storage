@@ -1,7 +1,7 @@
 import { HostTree } from '@angular-devkit/schematics';
 import {
   SchematicTestRunner,
-  UnitTestTree
+  UnitTestTree,
 } from '@angular-devkit/schematics/testing';
 import * as path from 'path';
 import { Schema as AzureOptions } from './schema';
@@ -119,10 +119,14 @@ describe('Running nest add @nestjs/azure-storage in a clean project', () => {
     runner.runSchematic('nest-add', azureOptions, tree);
 
     const fileContent = JSON.parse(tree.readContent('/package.json'));
-    expect(fileContent.dependencies).toBeTruthy();
-    expect(fileContent.dependencies['@azure/ms-rest-js']).toBeTruthy();
-    expect(fileContent.dependencies['@azure/storage-blob']).toBeTruthy();
-    expect(fileContent.dependencies['dotenv']).toBeTruthy();
+    expect(Object.keys(fileContent.dependencies).sort()).toEqual(
+      [
+        '@nestjs/azure-storage',
+        '@azure/ms-rest-js',
+        '@azure/storage-blob',
+        'dotenv',
+      ].sort(),
+    );
   });
 
   it('should add all required dependencies to package.json even if --skipInstall is used', () => {
@@ -197,7 +201,7 @@ describe('Running nest add @nestjs/azure-storage in a clean project', () => {
   it(`should not add AzureStorageModule.withConfig(...) call if already exists`, () => {
     tree.create('/src/app.mpdule.ts', APP_MODULE_CONTENT_WITH_CONFIG);
     runner.runSchematic('nest-add', azureOptions, tree);
-    
+
     const content = tree.readContent('/src/app.mpdule.ts');
     expect(content).toMatch(APP_MODULE_CONTENT_WITH_CONFIG);
   });
@@ -208,7 +212,7 @@ describe('Running nest add @nestjs/azure-storage in a clean project', () => {
       const fileContent = tree.readContent('/src/app.module.ts');
       expect(fileContent).toContain(AZURE_MODULE_CONFIG);
     });
-    
+
     it('when "Module.import" is undefined', () => {
       tree.create('/src/app.mpdule.ts', APP_MODULE_CONTENT_NO_IMPORT);
       runner.runSchematic('nest-add', azureOptions, tree);

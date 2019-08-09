@@ -22,6 +22,11 @@ function addDependenciesAndScripts(): Rule {
   return (host: Tree) => {
     addPackageJsonDependency(host, {
       type: NodeDependencyType.Default,
+      name: '@nestjs/azure-storage',
+      version: '^1.0.0',
+    });
+    addPackageJsonDependency(host, {
+      type: NodeDependencyType.Default,
       name: '@azure/storage-blob',
       version: '^10.4.0',
     });
