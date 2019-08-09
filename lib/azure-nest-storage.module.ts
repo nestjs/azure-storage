@@ -12,10 +12,10 @@ const PUBLIC_PROVIDERS = [AzureMulterStorageService, AzureStorageService];
   providers: [...PUBLIC_PROVIDERS],
   exports: [...PUBLIC_PROVIDERS, AZURE_STORAGE_MODULE_OPTIONS],
 })
-export class NestAzureStorageModule {
+export class AzureStorageModule {
   static withConfig(options: AzureStorageOptions): DynamicModule {
     return {
-      module: NestAzureStorageModule,
+      module: AzureStorageModule,
       providers: [{ provide: AZURE_STORAGE_MODULE_OPTIONS, useValue: options }],
     };
   }
