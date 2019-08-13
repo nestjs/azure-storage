@@ -161,11 +161,11 @@ describe('Running nest add @nestjs/azure-storage in a clean project', () => {
     expect(fileContent).toContain('AZURE_STORAGE_ACCOUNT=testing');
   });
 
-  it(`should add the require('dotenv') call in src/main.ts`, () => {
+  it(`should not add the require('dotenv') call in src/main.ts`, () => {
     runner.runSchematic('nest-add', azureOptions, tree);
 
     const fileContent = tree.readContent('/src/main.ts');
-    expect(fileContent).toContain(
+    expect(fileContent).not.toContain(
       `if (process.env.NODE_ENV !== 'production') require('dotenv').config();`,
     );
   });
@@ -235,16 +235,6 @@ describe('Running nest add @nestjs/azure-storage in a complex project', () => {
     expect(() => {
       runner.runSchematic('nest-add', azureOptions, tree);
     }).toThrow('Could not read package.json.');
-  });
-
-  it('should throw if missing src/main.ts', () => {
-    tree.create('/package.json', JSON.stringify({}));
-
-    expect(() => {
-      runner.runSchematic('nest-add', azureOptions, tree);
-    }).toThrow(
-      'Could not locate "src/main.ts". Make sure to provide the correct --mainFileName argument.',
-    );
   });
 
   it('should throw if missing src/app.module.ts', () => {

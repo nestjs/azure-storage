@@ -59,7 +59,9 @@ export default function(options: AzureOptions): Rule {
         chain([
           addDependenciesAndScripts(),
           addDotEnvConfig(options),
-          addDotEnvCall(options),
+          // Note: we are going to let the user decide where and how they
+          // would like to insert this line in their app.
+          // addDotEnvCall(options),
           updateGitIgnore(options),
           addAzureStorageModuleToImports(options),
         ]),
