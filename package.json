@@ -1,6 +1,6 @@
 {
   "name": "@nestjs/azure-storage",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "An Azure Storage module for Nest framework (node.js)",
   "license": "MIT",
   "author": "Wassim Chegham",
