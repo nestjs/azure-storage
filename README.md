@@ -51,7 +51,6 @@ $ nest add @nestjs/azure-storage --rootDir app
 ```
 
 When requested, provide the `storageAccountName` and `storageAccountSAS` (see below).
-```
 
 Other available flags:
 
@@ -73,7 +72,7 @@ $ npm i -S @nestjs/azure-storage
 
 2. Create or update your excisting `.env` file with the following content:
 
-```
+```bash
 AZURE_STORAGE_SAS_KEY=
 AZURE_STORAGE_ACCOUNT=
 ```
@@ -84,7 +83,7 @@ AZURE_STORAGE_ACCOUNT=
 
 4. Make sure to call the following call to your main file:
 
-```
+```typescript
 if (process.env.NODE_ENV !== 'production') require('dotenv').config();
 ```
 
@@ -92,7 +91,7 @@ if (process.env.NODE_ENV !== 'production') require('dotenv').config();
 
 5. Import the `AzureStorageModule` with the following configuration:
 
-```
+```typescript
 import { Module } from '@nestjs/common';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
@@ -118,7 +117,7 @@ export class AppModule {}
 
 ### Store a file using the default container name
 
-```
+```typescript
 import {
   Controller,
   Logger,
@@ -150,7 +149,7 @@ export class AppController {
 
 ### Store a file using a specific container name
 
-```
+```typescript
 import {
   Controller,
   Logger,
@@ -182,10 +181,9 @@ export class AppController {
 }
 ```
 
-
 ### Store a file using a custom file name
 
-```
+```typescript
 import {
   Controller,
   Logger,
