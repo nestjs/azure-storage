@@ -70,7 +70,7 @@ Other available flags:
 $ npm i -S @nestjs/azure-storage
 ```
 
-2. Create or update your excisting `.env` file with the following content:
+2. Create or update your existing `.env` file with the following content:
 
 ```bash
 AZURE_STORAGE_SAS_KEY=
@@ -81,7 +81,7 @@ AZURE_STORAGE_ACCOUNT=
 
 3. **IMPORTANT: Make sure to add your `.env` file to your `.gitignore`! The `.env` file MUST NOT be versionned on Git.**
 
-4. Make sure to call the following call to your main file:
+4. Make sure to include the following call to your main file:
 
 ```typescript
 if (process.env.NODE_ENV !== 'production') require('dotenv').config();
