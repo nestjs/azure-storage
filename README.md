@@ -73,7 +73,9 @@ $ npm i -S @nestjs/azure-storage
 2. Create or update your existing `.env` file with the following content:
 
 ```bash
+# See: http://bit.ly/azure-storage-sas-key
 AZURE_STORAGE_SAS_KEY=
+# See: http://bit.ly/azure-storage-account
 AZURE_STORAGE_ACCOUNT=
 ```
 
