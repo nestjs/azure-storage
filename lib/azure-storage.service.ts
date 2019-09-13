@@ -33,29 +33,34 @@ export class AzureStorageService {
   async upload(
     file: UploadedFileMetadata,
     perRequestOptions: Partial<AzureStorageOptions> = null,
-  ) {
+  ): Promise<string | null> {
     // override global options with the provided ones for this request
-    perRequestOptions = Object.assign(this.options, perRequestOptions);
+    perRequestOptions = {
+      ...this.options,
+      ...perRequestOptions,
+    };
 
-    const content = file.buffer;
-
-    if (!content) {
-      Logger.error(`Error encountered: File is not a valid Buffer`, APP_NAME);
-      return false;
-    }
-
-    if (
-      typeof this.options.sasKey !== 'string' &&
-      perRequestOptions.sasKey === ''
-    ) {
-      Logger.error(
+    if (!perRequestOptions.accountName) {
+      throw new Error(
         `Error encountered: "AZURE_STORAGE_ACCOUNT" was not provided.`,
-        APP_NAME,
       );
-      return false;
     }
 
-    const url = `https://${perRequestOptions.accountName}.blob.core.windows.net/${perRequestOptions.sasKey}`;
+    if (!perRequestOptions.sasKey) {
+      throw new Error(
+        `Error encountered: "AZURE_STORAGE_SAS_KEY" was not provided.`,
+      );
+    }
+
+    const { buffer } = file;
+
+    if (!buffer) {
+      throw new Error(
+        `Error encountered: File is not a valid Buffer (missing buffer property)`,
+      );
+    }
+
+    const url = this.getServiceUrl(perRequestOptions);
     const anonymousCredential = new Azure.AnonymousCredential();
     const pipeline = Azure.StorageURL.newPipeline(anonymousCredential);
     const serviceURL = new Azure.ServiceURL(
@@ -79,23 +84,19 @@ export class AzureStorageService {
     } catch (error) {
       if (error && error.statusCode) {
         if (error.statusCode === 403) {
-          Logger.error(
+          throw new Error(
             `Access denied for resource "${perRequestOptions.containerName}". Please check your "AZURE_STORAGE_SAS_KEY" key.`,
-            APP_NAME,
           );
         } else {
-          Logger.error(`Error encountered: ${error.statusCode}`, APP_NAME);
+          throw new Error(`Error encountered: ${error.statusCode}`);
         }
       } else if (error && error.code === 'REQUEST_SEND_ERROR') {
-        Logger.error(
+        throw new Error(
           `Account not found: "${perRequestOptions.accountName}". Please check your "AZURE_STORAGE_ACCOUNT" value.`,
-          APP_NAME,
         );
       } else {
-        Logger.error(error, APP_NAME);
+        throw new Error(error);
       }
-
-      return false;
     }
 
     if (doesContainerExists === false) {
@@ -119,16 +120,21 @@ export class AzureStorageService {
     try {
       const uploadBlobResponse = await blockBlobURL.upload(
         Azure.Aborter.none,
-        content,
-        content.byteLength,
+        buffer,
+        buffer.byteLength,
       );
       Logger.log(`Blob "${blobName}" uploaded successfully`, APP_NAME);
     } catch (error) {
-      Logger.error(`Failed to upload blob "${blobName}"`, APP_NAME);
-      Logger.error(error, APP_NAME);
+      throw new Error(error);
     }
 
     return blockBlobURL.url;
+  }
+
+  getServiceUrl(perRequestOptions: Partial<AzureStorageOptions>) {
+    // remove the first ? symbol if present
+    perRequestOptions.sasKey = perRequestOptions.sasKey.replace('?', '');
+    return `https://${perRequestOptions.accountName}.blob.core.windows.net/?${perRequestOptions.sasKey}`;
   }
 
   private async _listContainers(serviceURL: Azure.ServiceURL) {
