@@ -124,7 +124,7 @@ export class AzureStorageService {
         buffer.byteLength,
         {
           blobHTTPHeaders: {
-            blobContentType: mimetype,
+            blobContentType: mimetype || 'application/octet-stream',
           },
         },
       );
