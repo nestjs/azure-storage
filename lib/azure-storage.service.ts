@@ -52,7 +52,7 @@ export class AzureStorageService {
       );
     }
 
-    const { buffer } = file;
+    const { buffer, mimetype } = file;
 
     if (!buffer) {
       throw new Error(
@@ -122,6 +122,11 @@ export class AzureStorageService {
         Azure.Aborter.none,
         buffer,
         buffer.byteLength,
+        {
+          blobHTTPHeaders: {
+            blobContentType: mimetype,
+          },
+        },
       );
       Logger.log(`Blob "${blobName}" uploaded successfully`, APP_NAME);
     } catch (error) {
