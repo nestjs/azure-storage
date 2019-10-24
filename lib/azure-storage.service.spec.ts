@@ -1,8 +1,6 @@
 jest.mock('@azure/storage-blob');
 import * as Azure from '@azure/storage-blob';
 
-require('dotenv').config();
-
 import {
   AzureStorageService,
   AzureStorageOptions,
@@ -40,16 +38,15 @@ Azure.BlockBlobURL.fromBlobURL = (...args: any): any => {
   };
 };
 
-const options: AzureStorageOptions = {
-  accountName: 'test_account',
-  containerName: 'test_container',
-  sasKey: process.env.AZURE_STORAGE_SAS_KEY,
-};
-
 let storage = null;
 
 describe('AzureStorageService', () => {
   beforeEach(() => {
+    const options: AzureStorageOptions = {
+      accountName: 'test_account',
+      containerName: 'test_container',
+      sasKey: 'FAKE_SAS_KEY',
+    };
     storage = new AzureStorageService(options);
   });
 
