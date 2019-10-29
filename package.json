@@ -27,7 +27,7 @@
     "@nestjs/platform-express": "6.7.2",
     "@types/jest": "^24.0.17",
     "@types/node": "11.15.0",
-    "husky": "3.0.5",
+    "husky": "3.0.9",
     "jest": "^24.8.0",
     "lint-staged": "9.4.0",
     "mock-stdin": "^0.3.1",
