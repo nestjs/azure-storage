@@ -7,7 +7,7 @@
   "scripts": {
     "test": "jest",
     "precommit": "lint-staged",
-    "prettier": "prettier src/**/*.ts --write && git status",
+    "prettier": "prettier lib/**/*.ts --write && git status",
     "build": "npm run build:lib && npm run build:schematics && npm test",
     "build:lib": "tsc -p tsconfig.json",
     "build:schematics": "tsc -p tsconfig.schematics.json",
