@@ -39,7 +39,7 @@ import { hasNestModuleImport } from '../utils/nest-module-import';
  */
 export function addAzureStorageModuleToImports(options: AzureOptions): Rule {
   return (tree: Tree, context: SchematicContext) => {
-    const MODULE_WITH_CONFIG = `AzureStorageModule.withConfig({sasKey: process.env['AZURE_STORAGE_SAS_KEY'], accountName: process.env['AZURE_STORAGE_ACCOUNT'], containerName: 'nest-demo-container' })`;
+    const MODULE_WITH_CONFIG = `AzureStorageModule.withConfig({ containerName: 'nest-demo-container' })`;
     const appModulePath = normalize(
       options.rootDir + `/` + options.rootModuleFileName + `.ts`,
     );
