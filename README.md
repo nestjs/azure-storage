@@ -107,11 +107,7 @@ import { AzureStorageModule } from '@nestjs/azure-storage';
   controllers: [AppController],
   providers: [AppService],
   imports: [
-    AzureStorageModule.withConfig({
-      sasKey: process.env['AZURE_STORAGE_SAS_KEY'],
-      accountName: process.env['AZURE_STORAGE_ACCOUNT'],
-      containerName: 'nest-demo-container',
-    }),
+    AzureStorageModule.withConfig({ containerName: 'nest-demo-container' }),
   ],
 })
 export class AppModule {}

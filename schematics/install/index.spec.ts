@@ -8,7 +8,7 @@ import { Schema as AzureOptions } from './schema';
 
 const collectionPath = path.join(__dirname, '../collection.json');
 
-const AZURE_MODULE_CONFIG = `AzureStorageModule.withConfig({sasKey: process.env['AZURE_STORAGE_SAS_KEY'], accountName: process.env['AZURE_STORAGE_ACCOUNT'], containerName: 'nest-demo-container' }`;
+const AZURE_MODULE_CONFIG = `AzureStorageModule.withConfig({ containerName: 'nest-demo-container' }`;
 const AZURE_MODULE_IMPORT = `import { AzureStorageModule } from '@nestjs/azure-storage';`;
 const APP_MODULE_CONTENT = `
 import { Module } from '@nestjs/common';
