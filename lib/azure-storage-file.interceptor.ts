@@ -10,12 +10,15 @@ import {
 import { FileInterceptor } from '@nestjs/platform-express';
 import { MulterOptions } from '@nestjs/platform-express/multer/interfaces/multer-options.interface';
 import { Observable } from 'rxjs';
-import { AzureStorageService, AzureStorageOptions } from './azure-storage.service';
+import {
+  AzureStorageService,
+  AzureStorageOptions,
+} from './azure-storage.service';
 
 export function AzureStorageFileInterceptor(
   fieldName: string,
   localOptions?: MulterOptions,
-  azureStorageOptions?: Partial<AzureStorageOptions>
+  azureStorageOptions?: Partial<AzureStorageOptions>,
 ): Type<NestInterceptor> {
   @Injectable()
   class MixinInterceptor implements NestInterceptor {
@@ -35,14 +38,17 @@ export function AzureStorageFileInterceptor(
       const file = request[fieldName];
 
       if (!file) {
-        Logger.error(
+        Logger.warn(
           'AzureStorageFileInterceptor',
           `Can not intercept field "${fieldName}". Did you specify the correct field name in @AzureStorageFileInterceptor('${fieldName}')?`,
         );
-        return;
+        return next.handle();
       }
 
-      const storageUrl = await this.azureStorage.upload(file, azureStorageOptions);
+      const storageUrl = await this.azureStorage.upload(
+        file,
+        azureStorageOptions,
+      );
       file.storageUrl = storageUrl;
       return next.handle();
     }
