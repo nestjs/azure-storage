@@ -6,6 +6,7 @@
   "author": "Wassim Chegham",
   "scripts": {
     "test": "jest",
+    "test:watch": "jest --watch",
     "precommit": "lint-staged",
     "prettier": "prettier src/**/*.ts --write && git status",
     "build": "npm run build:lib && npm run build:schematics && npm test",
@@ -22,27 +23,28 @@
     "@nestjs/platform-express": "^6.0.0"
   },
   "devDependencies": {
-    "@nestjs/common": "6.11.7",
-    "@nestjs/core": "6.11.7",
-    "@nestjs/platform-express": "6.11.7",
-    "@types/jest": "^25.0.0",
-    "@types/node": "11.15.0",
-    "husky": "4.2.3",
-    "jest": "^25.0.0",
+    "@angular/cdk": "^8.1.2",
+    "@nestjs/common": "^7.2.0",
+    "@nestjs/core": "^7.2.0",
+    "@nestjs/platform-express": "^7.2.0",
+    "@types/jest": "^26.0.3",
+    "@types/node": "^14.0.14",
+    "husky": "^4.2.5",
+    "jest": "^26.1.0",
     "lint-staged": "10.0.7",
     "mock-stdin": "^1.0.0",
     "prettier": "1.19.1",
-    "ts-jest": "^25.0.0",
-    "ts-morph": "5.0.0",
-    "@angular/cdk": "^8.1.2",
     "reflect-metadata": "^0.1.12",
-    "typescript": "3.6.4"
+    "ts-jest": "^26.1.1",
+    "ts-morph": "5.0.0",
+    "typescript": "^3.9.5"
   },
   "dependencies": {
     "@angular-devkit/schematics": "8.3.15",
     "@schematics/angular": "8.3.15",
     "@angular/cdk": "8.2.3",
-    "@azure/storage-blob": "10.5.0"
+    "@azure/storage-blob": "^12.1.2",
+    "@azure/identity": "^1.0.3"
   },
   "main": "./dist/index.js",
   "schematics": "./schematics/collection.json",
