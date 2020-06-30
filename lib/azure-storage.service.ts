@@ -165,12 +165,22 @@ export class AzureStorageService {
     const client = this.getRequestClient(requestOptions);
     const containerClient = await client.getContainerClient(blobDownloadData.containerName);
     const blobClient = await containerClient.getBlockBlobClient(decodeURI(blobDownloadData.blobName));
-    const response = await blobClient.delete();
+    try {
+      const response = await blobClient.delete();
+  
+      if (response.errorCode) {
+        throw new Error(response.errorCode);
+      }
+      
+      return true;
+    } catch (err) {
+      if (err.message.indexOf('The specified blob does not exist.') !== -1) return true;
+    }
 
-    return true;
+    return false;
   }
 
-  async download(storageUrl: string, perRequestOptions: Partial<AzureStorageOptions> = {},) {
+  async download(storageUrl: string, perRequestOptions: Partial<AzureStorageOptions> = {},): Promise<Buffer> {
     const blobDownloadData = this.parseStorageUrl(storageUrl);
 
     const urlOptions = this.mergeWithDefaultOptions(blobDownloadData);
@@ -179,8 +189,6 @@ export class AzureStorageService {
     const client = this.getRequestClient(requestOptions);
     const containerClient = await client.getContainerClient(blobDownloadData.containerName);
     const blobClient = await containerClient.getBlockBlobClient(decodeURI(blobDownloadData.blobName));
-
-    const file = await blobClient.download();
 
     const downloadBlockBlobResponse = await blobClient.download();
     const buffer = await this.streamToBuffer(downloadBlockBlobResponse.readableStreamBody);

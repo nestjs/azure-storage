@@ -6,7 +6,7 @@ const JAzure = jest.mock('@azure/storage-blob', () => ({
       getContainerClient: jest.fn().mockReturnValue(
         {
           getBlockBlobClient: jest.fn().mockReturnValue({
-            upload: jest.fn().mockResolvedValue({errorCode: undefined}),
+            upload: jest.fn(),
             delete: jest.fn(),
             download: jest.fn().mockResolvedValue({
               readableStreamBody: Readable.from([Buffer.from('test')]),
@@ -111,7 +111,7 @@ describe('AzureStorageService', () => {
 
       it('should fail upload when File is size', async () => {
         try {
-          await storage.upload({name: 'a', buffer: Buffer.from('')} as any);
+          await storage.upload({name: 'a', buffer: new Buffer(10)} as any);
         } catch (e) {
           expect(e.toString()).toBe(
               "TypeError: file.size must be provided",
