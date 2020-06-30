@@ -43,7 +43,7 @@
     "@angular-devkit/schematics": "^10.0.0",
     "@azure/identity": "^1.0.3",
     "@azure/storage-blob": "^12.1.2",
-    "@schematics/angular": "^10.0.0"
+    "@schematics/angular": "^8.3.28"
   },
   "main": "./dist/index.js",
   "schematics": "./schematics/collection.json",
