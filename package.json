@@ -25,7 +25,7 @@
     "@nestjs/common": "6.11.7",
     "@nestjs/core": "6.11.7",
     "@nestjs/platform-express": "6.11.7",
-    "@types/jest": "^25.0.0",
+    "@types/jest": "^26.0.0",
     "@types/node": "11.15.0",
     "husky": "4.2.3",
     "jest": "^25.0.0",
