@@ -39,7 +39,6 @@ export interface StorageBlobData {
 
 @Injectable()
 export class AzureStorageService {
-  
   static readonly defaultConfig: AzureStorageOptions = {
     accountName: undefined,
     containerName: undefined,
@@ -48,56 +47,82 @@ export class AzureStorageService {
     connectionString: undefined,
   };
   private readonly blobClient: Azure.BlobServiceClient;
+  
   constructor(
     @Inject(AZURE_STORAGE_MODULE_OPTIONS)
     private readonly options: AzureStorageOptions,
   ) {
     this.blobClient = this.getClient(options);
   }
-
-  // [Node.js only] A helper method used to read a Node.js readable stream into string FROM [https://www.npmjs.com/package/@azure/storage-blob]
-  private async streamToBuffer(readableStream): Promise<Buffer> {
-    return new Promise((resolve, reject) => {
-      const chunks = [];
-      readableStream.on('data', (data) => {
-        chunks.push(data);
-      });
-      readableStream.on('end', () => {
-        resolve(Buffer.concat(chunks));
-      });
-      readableStream.on('error', reject);
-    });
-  }
-
-
-  /**
-   * Creates new BlobServiceClient using provided configuration
-   * @param options AzureStorageOptions
-   *
-   * @todo: Add some static memory for configurations - so we will not be creating infinite number of object for same configuration (but different from default)
-   */
-  private getClient(options: AzureStorageOptions): Azure.BlobServiceClient {
-    if (options.sasKey) {
-      return new Azure.BlobServiceClient(
-        `https://${options.accountName}.blob.core.windows.net/${options.sasKey}`,
-      );
-    } else if (options.accountKey) {
-      const sharedKeyCredentials = new Azure.StorageSharedKeyCredential(options.accountName, options.accountKey);
-      return new Azure.BlobServiceClient(
-        `https://${options.accountName}.blob.core.windows.net/`,
-        sharedKeyCredentials,
-      );
-    } else if (options.connectionString) {
-      return Azure.BlobServiceClient.fromConnectionString(options.connectionString);
-    } else {
-      const defaultAzureCredential  = new DefaultAzureCredential();
-      return new Azure.BlobServiceClient(
-        `https://${options.accountName}.blob.core.windows.net/`,
-        defaultAzureCredential ,
-      );
-    }
+  
+  
+  async download(storageUrl: string, perRequestOptions: Partial<AzureStorageOptions> = {},): Promise<Buffer> {
+    const blobDownloadData = this.parseStorageUrl(storageUrl);
+    
+    const urlOptions = this.mergeWithDefaultOptions(blobDownloadData);
+    const requestOptions = Object.assign(this.mergeWithDefaultOptions(perRequestOptions), urlOptions);
+    
+    const client = this.getRequestClient(requestOptions);
+    const containerClient = await client.getContainerClient(blobDownloadData.containerName);
+    const blobClient = await containerClient.getBlockBlobClient(decodeURI(blobDownloadData.blobName));
+    
+    const downloadBlockBlobResponse = await blobClient.download();
+    const buffer = await this.streamToBuffer(downloadBlockBlobResponse.readableStreamBody);
+    return buffer;
   }
   
+  async upload(file: AzureFileToUpload, perRequestOptions: Partial<AzureStorageOptions> = {},) {
+    if (!file) {
+      throw new TypeError('file object of AzureFileToUpload to upload must be provided');
+    }
+    if (!file.name) {
+      throw new TypeError('file.name must be provided');
+    }
+    if (!file.buffer) {
+      throw new TypeError('file.buffer must be provided');
+    }
+    if (!file.size) {
+      throw new TypeError('file.size must be provided');
+    }
+    
+    
+    const requestOptions = this.mergeWithDefaultOptions(perRequestOptions);
+    const client = this.getRequestClient(requestOptions);
+    const containerClient = await client.getContainerClient(this.options.containerName);
+    const blobClient = await containerClient.getBlockBlobClient(file.name);
+    const uploadStatus = await blobClient.upload(file.buffer, file.size);
+    
+    if (uploadStatus.errorCode) {
+      throw new Error(uploadStatus.errorCode);
+    }
+    
+    return this.getBlobUrl(file.name, requestOptions);
+  }
+  
+  
+  async delete(storageUrl: string, perRequestOptions: Partial<AzureStorageOptions> = {},) {
+    const blobDownloadData = this.parseStorageUrl(storageUrl);
+    
+    const urlOptions = this.mergeWithDefaultOptions(blobDownloadData);
+    const requestOptions = Object.assign(this.mergeWithDefaultOptions(perRequestOptions), urlOptions);
+    
+    const client = this.getRequestClient(requestOptions);
+    const containerClient = await client.getContainerClient(blobDownloadData.containerName);
+    const blobClient = await containerClient.getBlockBlobClient(decodeURI(blobDownloadData.blobName));
+    try {
+      const response = await blobClient.delete();
+      
+      if (response.errorCode) {
+        throw new Error(response.errorCode);
+      }
+      
+      return true;
+    } catch (err) {
+      if (err.message.indexOf('The specified blob does not exist.') !== -1) return true;
+    }
+    
+    return false;
+  }
   
   /**
    * Splits storage url into accountName, containerName and blobName
@@ -155,75 +180,53 @@ export class AzureStorageService {
   protected getBlobUrl(blobName: string, perRequestOptions: Partial<AzureStorageOptions>): string {
     return `https://${perRequestOptions.accountName}.blob.core.windows.net/${perRequestOptions.containerName}/${blobName}`;
   }
-
-  async delete(storageUrl: string, perRequestOptions: Partial<AzureStorageOptions> = {},) {
-    const blobDownloadData = this.parseStorageUrl(storageUrl);
-
-    const urlOptions = this.mergeWithDefaultOptions(blobDownloadData);
-    const requestOptions = Object.assign(this.mergeWithDefaultOptions(perRequestOptions), urlOptions);
-
-    const client = this.getRequestClient(requestOptions);
-    const containerClient = await client.getContainerClient(blobDownloadData.containerName);
-    const blobClient = await containerClient.getBlockBlobClient(decodeURI(blobDownloadData.blobName));
-    try {
-      const response = await blobClient.delete();
   
-      if (response.errorCode) {
-        throw new Error(response.errorCode);
-      }
-      
-      return true;
-    } catch (err) {
-      if (err.message.indexOf('The specified blob does not exist.') !== -1) return true;
-    }
-
-    return false;
+  
+  // [Node.js only] A helper method used to read a Node.js readable stream into string FROM [https://www.npmjs.com/package/@azure/storage-blob]
+  private async streamToBuffer(readableStream): Promise<Buffer> {
+    return new Promise((resolve, reject) => {
+      const chunks = [];
+      readableStream.on('data', (data) => {
+        chunks.push(data);
+      });
+      readableStream.on('end', () => {
+        resolve(Buffer.concat(chunks));
+      });
+      readableStream.on('error', reject);
+    });
   }
-
-  async download(storageUrl: string, perRequestOptions: Partial<AzureStorageOptions> = {},): Promise<Buffer> {
-    const blobDownloadData = this.parseStorageUrl(storageUrl);
-
-    const urlOptions = this.mergeWithDefaultOptions(blobDownloadData);
-    const requestOptions = Object.assign(this.mergeWithDefaultOptions(perRequestOptions), urlOptions);
-
-    const client = this.getRequestClient(requestOptions);
-    const containerClient = await client.getContainerClient(blobDownloadData.containerName);
-    const blobClient = await containerClient.getBlockBlobClient(decodeURI(blobDownloadData.blobName));
-
-    const downloadBlockBlobResponse = await blobClient.download();
-    const buffer = await this.streamToBuffer(downloadBlockBlobResponse.readableStreamBody);
-    return buffer;
+  
+  
+  /**
+   * Creates new BlobServiceClient using provided configuration
+   * @param options AzureStorageOptions
+   *
+   * @todo: Add some static memory for configurations - so we will not be creating infinite number of object for same configuration (but different from default)
+   */
+  private getClient(options: AzureStorageOptions): Azure.BlobServiceClient {
+    if (options.sasKey) {
+      return new Azure.BlobServiceClient(
+        `https://${options.accountName}.blob.core.windows.net/${options.sasKey}`,
+      );
+    } else if (options.accountKey) {
+      const sharedKeyCredentials = new Azure.StorageSharedKeyCredential(options.accountName, options.accountKey);
+      return new Azure.BlobServiceClient(
+        `https://${options.accountName}.blob.core.windows.net/`,
+        sharedKeyCredentials,
+      );
+    } else if (options.connectionString) {
+      return Azure.BlobServiceClient.fromConnectionString(options.connectionString);
+    } else {
+      const defaultAzureCredential  = new DefaultAzureCredential();
+      return new Azure.BlobServiceClient(
+        `https://${options.accountName}.blob.core.windows.net/`,
+        defaultAzureCredential ,
+      );
+    }
   }
-
-  async upload(file: AzureFileToUpload, perRequestOptions: Partial<AzureStorageOptions> = {},) {
-    if (!file) {
-      throw new TypeError('file object of AzureFileToUpload to upload must be provided');
-    }
-    if (!file.name) {
-      throw new TypeError('file.name must be provided');
-    }
-    if (!file.buffer) {
-      throw new TypeError('file.buffer must be provided');
-    }
-    if (!file.size) {
-      throw new TypeError('file.size must be provided');
-    }
-
-
-    const requestOptions = this.mergeWithDefaultOptions(perRequestOptions);
-    const client = this.getRequestClient(requestOptions);
-    const containerClient = await client.getContainerClient(this.options.containerName);
-    const blobClient = await containerClient.getBlockBlobClient(file.name);
-    const uploadStatus = await blobClient.upload(file.buffer, file.size);
-
-    if (uploadStatus.errorCode) {
-      throw new Error(uploadStatus.errorCode);
-    }
-
-    return this.getBlobUrl(file.name, requestOptions);
-  }
-
-
+  
+  
+ 
   /**
    * Merges provided config with default and checking if its properly set.
    * Returns merged config.

@@ -1,12 +1,11 @@
-import {BlockBlobClient, BlockBlobUploadResponse} from "@azure/storage-blob";
-
+import { Readable } from 'stream';
 const JAzure = jest.mock('@azure/storage-blob', () => ({
   BlobServiceClient: jest.fn().mockImplementation((...any: any) => {
     return {
       getContainerClient: jest.fn().mockReturnValue(
         {
           getBlockBlobClient: jest.fn().mockReturnValue({
-            upload: jest.fn(),
+            upload: jest.fn().mockResolvedValue('a'),
             delete: jest.fn(),
             download: jest.fn().mockResolvedValue({
               readableStreamBody: Readable.from([Buffer.from('test')]),
@@ -17,14 +16,17 @@ const JAzure = jest.mock('@azure/storage-blob', () => ({
     };
   }),
 }));
+import {BlockBlobClient, BlockBlobUploadResponse} from '@azure/storage-blob';
 import * as Azure from '@azure/storage-blob';
+
 
 import {
   AzureStorageService,
   AzureStorageOptions,
   AzureFileToUpload,
 } from './azure-storage.service';
-import {Readable, Stream} from "stream";
+
+
 
 
 const buffer = Buffer.from('test');
@@ -60,7 +62,7 @@ describe('AzureStorageService', () => {
           await storage.upload(file, {sasKey: undefined});
         } catch (e) {
           return expect(e.toString()).toBe(
-              'Error: Error encountered: Neither "sasKey" nor "accountKey" nor "connectionString" was not provided.',
+            'Error: Error encountered: Neither "sasKey" nor "accountKey" nor "connectionString" was not provided.',
           );
         }
 
@@ -72,7 +74,7 @@ describe('AzureStorageService', () => {
           await storage.upload(file, {accountName: null});
         } catch (e) {
           return expect(e.toString()).toBe(
-              'Error: Error encountered: "accountName" was not provided.',
+            'Error: Error encountered: "accountName" was not provided.',
           );
         }
 
@@ -84,7 +86,7 @@ describe('AzureStorageService', () => {
           await storage.upload(null);
         } catch (e) {
           expect(e.toString()).toBe(
-              "TypeError: file object of AzureFileToUpload to upload must be provided",
+            'TypeError: file object of AzureFileToUpload to upload must be provided',
           );
         }
       });
@@ -94,7 +96,7 @@ describe('AzureStorageService', () => {
           await storage.upload({} as any);
         } catch (e) {
           expect(e.toString()).toBe(
-              "TypeError: file.name must be provided",
+            'TypeError: file.name must be provided',
           );
         }
       });
@@ -104,7 +106,7 @@ describe('AzureStorageService', () => {
           await storage.upload({name: 'a'} as any);
         } catch (e) {
           expect(e.toString()).toBe(
-              "TypeError: file.buffer must be provided",
+            'TypeError: file.buffer must be provided',
           );
         }
       });
@@ -114,7 +116,7 @@ describe('AzureStorageService', () => {
           await storage.upload({name: 'a', buffer: new Buffer(10)} as any);
         } catch (e) {
           expect(e.toString()).toBe(
-              "TypeError: file.size must be provided",
+            'TypeError: file.size must be provided',
           );
         }
       });
