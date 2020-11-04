@@ -1,5 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.addImportToModule = exports.getMetadataField = exports.addSymbolToNestModuleMetadata = exports.getDecoratorMetadata = void 0;
 const ast_utils_1 = require("@schematics/angular/utility/ast-utils");
 const change_1 = require("@schematics/angular/utility/change");
 const ts = require("typescript");

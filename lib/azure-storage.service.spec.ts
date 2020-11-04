@@ -1,9 +1,7 @@
 jest.mock('@azure/storage-blob');
-import * as Azure from '@azure/storage-blob';
-
 import {
-  AzureStorageService,
   AzureStorageOptions,
+  AzureStorageService,
   UploadedFileMetadata,
 } from './azure-storage.service';
 
@@ -18,27 +16,7 @@ const file: UploadedFileMetadata = {
   storageUrl: null,
 };
 
-Azure.ServiceURL.prototype.listContainersSegment = (...args: any): any => {
-  return {
-    nextMarker: null,
-    containerItems: [],
-  };
-};
-
-Azure.ContainerURL.fromServiceURL = (...args: any): any => {
-  return {
-    create(...args: any) {},
-  };
-};
-
-Azure.BlockBlobURL.fromBlobURL = (...args: any): any => {
-  return {
-    upload() {},
-    url: 'FAKE_URL',
-  };
-};
-
-let storage = null;
+let storage: AzureStorageService = null;
 
 describe('AzureStorageService', () => {
   beforeEach(() => {

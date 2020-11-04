@@ -41,9 +41,9 @@ export function addDotEnvConfig(options: AzureOptions): Rule {
     // environment vars to add to .env file
     const newEnvFileContent =
       `# See: http://bit.ly/azure-storage-sas-key\n` +
-      `AZURE_STORAGE_SAS_KEY=${options.storageAccountSAS}\n` +
+      `AZURE_STORAGE_SAS_KEY="${options.storageAccountSAS}"\n` +
       `# See: http://bit.ly/azure-storage-account\n` +
-      `AZURE_STORAGE_ACCOUNT=${options.storageAccountName}\n`;
+      `AZURE_STORAGE_ACCOUNT="${options.storageAccountName}"\n`;
 
     const oldEnvFileContent = readEnvFile(tree, envPath);
 
@@ -55,7 +55,7 @@ export function addDotEnvConfig(options: AzureOptions): Rule {
 
     if (oldEnvFileContent === newEnvFileContent) {
       return context.logger.warn(
-        `Skipping enviromenent variables configuration ` +
+        `Skipping environment variables configuration ` +
           `because an ".env" file was detected and already contains these Azure Storage tokens:\n\n` +
           green(`# New configuration\n` + `${newEnvFileContent}`),
       );
@@ -68,7 +68,7 @@ export function addDotEnvConfig(options: AzureOptions): Rule {
       oldEnvFileContent.includes(AZURE_STORAGE_ACCOUNT)
     ) {
       return context.logger.warn(
-        `Skipping enviromenent variables configuration ` +
+        `Skipping environment variables configuration ` +
           `because an ".env" file was detected and already contains an Azure Storage tokens.\n` +
           `Please manually update your .env file with the following configuration:\n\n` +
           red(`# Old configuration\n` + `${oldEnvFileContent}\n`) +

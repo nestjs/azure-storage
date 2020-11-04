@@ -121,7 +121,7 @@ function resolveIdentifierOfExpression(
   if (ts.isIdentifier(expression)) {
     return expression;
   } else if (ts.isPropertyAccessExpression(expression)) {
-    return expression.name;
+    return expression.name as ts.Identifier;
   }
   return null;
 }

@@ -34,14 +34,14 @@
       "description": "The Azure Storage account name (see: http://bit.ly/azure-storage-account).",
       "type": "string",
       "x-prompt": {
-        "message": "What is your Azure Storage account name (see: http://bit.ly/azure-storage-account )?",
+        "message": "What is your Azure Storage account name (see: http://bit.ly/azure-storage-account)?",
         "type": "string"
       }
     },
     "storageAccountSAS": {
       "description": "The Azure Storage SAS Key (see: http://bit.ly/azure-storage-sas-key).",
       "type": "string",
-      "x-prompt": "What is your Azure Storage SAS key (see: http://bit.ly/azure-storage-sas-key )?"
+      "x-prompt": "What is your Azure Storage SAS key (see: http://bit.ly/azure-storage-sas-key)?"
     }
   },
   "required": ["storageAccountName", "storageAccountSAS"]

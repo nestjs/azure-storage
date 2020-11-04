@@ -14,8 +14,8 @@ import { Schema as AzureOptions } from './schema';
 import { addDotEnvCall, addDotEnvConfig } from './src/add-env-config';
 import { addAzureStorageModuleToImports } from './src/add-module';
 import { updateGitIgnore } from './src/update-git-ignore';
+import { registerOnExit } from './utils/register-clean-exit';
 
-import {registerOnExit} from './utils/register-clean-exit';
 registerOnExit();
 
 function addDependenciesAndScripts(): Rule {
@@ -23,12 +23,12 @@ function addDependenciesAndScripts(): Rule {
     addPackageJsonDependency(host, {
       type: NodeDependencyType.Default,
       name: '@nestjs/azure-storage',
-      version: '^1.0.0',
+      version: '^2.0.0',
     });
     addPackageJsonDependency(host, {
       type: NodeDependencyType.Default,
       name: '@azure/storage-blob',
-      version: '^10.4.0',
+      version: '^12.2.1',
     });
     addPackageJsonDependency(host, {
       type: NodeDependencyType.Default,
@@ -38,7 +38,7 @@ function addDependenciesAndScripts(): Rule {
     addPackageJsonDependency(host, {
       type: NodeDependencyType.Default,
       name: '@azure/ms-rest-js',
-      version: '^2.0.4',
+      version: '^2.1.0',
     });
     return host;
   };
@@ -48,8 +48,8 @@ function addDependenciesAndScripts(): Rule {
  * Schematic factory entry-point for the `ng-add` schematic.
  * The ng-add schematic will be automatically executed if developers run `ng add @nest/azure-storage`.
  */
-export default function(options: AzureOptions): Rule {
-  return (host: Tree, context: SchematicContext) => {
+export default function (options: AzureOptions): Rule {
+  return (_host: Tree, context: SchematicContext) => {
     if (!options.skipInstall) {
       context.addTask(new NodePackageInstallTask());
     }
@@ -59,9 +59,7 @@ export default function(options: AzureOptions): Rule {
         chain([
           addDependenciesAndScripts(),
           addDotEnvConfig(options),
-          // Note: we are going to let the user decide where and how they
-          // would like to insert this line in their app.
-          // addDotEnvCall(options),
+          addDotEnvCall(options),
           updateGitIgnore(options),
           addAzureStorageModuleToImports(options),
         ]),

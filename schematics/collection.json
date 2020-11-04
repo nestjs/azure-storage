@@ -5,7 +5,7 @@
       "description": "Adds Azure Storage support to the NestJS application",
       "factory": "./install",
       "schema": "./install/schema.json",
-      "aliases": ["az-storage"]
+      "aliases": ["nest-azure-storage"]
     }
   }
 }

@@ -1,5 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.addDotEnvCall = exports.addDotEnvConfig = void 0;
 const core_1 = require("@angular-devkit/core");
 const terminal_1 = require("@angular-devkit/core/src/terminal");
 const schematics_1 = require("@angular-devkit/schematics");
@@ -19,22 +20,22 @@ function addDotEnvConfig(options) {
             return null;
         }
         const newEnvFileContent = `# See: http://bit.ly/azure-storage-sas-key\n` +
-            `AZURE_STORAGE_SAS_KEY=${options.storageAccountSAS}\n` +
+            `AZURE_STORAGE_SAS_KEY="${options.storageAccountSAS}"\n` +
             `# See: http://bit.ly/azure-storage-account\n` +
-            `AZURE_STORAGE_ACCOUNT=${options.storageAccountName}\n`;
+            `AZURE_STORAGE_ACCOUNT="${options.storageAccountName}"\n`;
         const oldEnvFileContent = readEnvFile(tree, envPath);
         if (!oldEnvFileContent) {
             tree.create(envPath, newEnvFileContent);
             return tree;
         }
         if (oldEnvFileContent === newEnvFileContent) {
-            return context.logger.warn(`Skipping enviromenent variables configuration ` +
+            return context.logger.warn(`Skipping environment variables configuration ` +
                 `because an ".env" file was detected and already contains these Azure Storage tokens:\n\n` +
                 terminal_1.green(`# New configuration\n` + `${newEnvFileContent}`));
         }
         if (oldEnvFileContent.includes(AZURE_STORAGE_SAS_KEY) ||
             oldEnvFileContent.includes(AZURE_STORAGE_ACCOUNT)) {
-            return context.logger.warn(`Skipping enviromenent variables configuration ` +
+            return context.logger.warn(`Skipping environment variables configuration ` +
                 `because an ".env" file was detected and already contains an Azure Storage tokens.\n` +
                 `Please manually update your .env file with the following configuration:\n\n` +
                 terminal_1.red(`# Old configuration\n` + `${oldEnvFileContent}\n`) +

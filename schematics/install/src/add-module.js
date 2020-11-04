@@ -1,5 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.addAzureStorageModuleToImports = void 0;
 const core_1 = require("@angular-devkit/core");
 const ast_1 = require("../utils/ast");
 const nest_module_import_1 = require("../utils/nest-module-import");

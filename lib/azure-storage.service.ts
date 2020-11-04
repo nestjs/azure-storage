@@ -1,6 +1,6 @@
-import * as Azure from '@azure/storage-blob';
 import { ServiceClientOptions } from '@azure/ms-rest-js';
-
+import { AbortController } from '@azure/abort-controller';
+import { AnonymousCredential, BlobServiceClient } from '@azure/storage-blob';
 import { Inject, Injectable, Logger } from '@nestjs/common';
 import { AZURE_STORAGE_MODULE_OPTIONS } from './azure-storage.constant';
 
@@ -61,24 +61,22 @@ export class AzureStorageService {
     }
 
     const url = this.getServiceUrl(perRequestOptions);
-    const anonymousCredential = new Azure.AnonymousCredential();
-    const pipeline = Azure.StorageURL.newPipeline(anonymousCredential);
-    const serviceURL = new Azure.ServiceURL(
-      // When using AnonymousCredential, following url should include a valid SAS
+    const anonymousCredential = new AnonymousCredential();
+    const blobServiceClient: BlobServiceClient = new BlobServiceClient(
+      // When using AnonymousCredential, following url should include a valid SAS or support public access
       url,
-      pipeline,
+      anonymousCredential,
     );
 
-    // Create a container
-    const containerURL = Azure.ContainerURL.fromServiceURL(
-      serviceURL,
+    const containerClient = blobServiceClient.getContainerClient(
       perRequestOptions.containerName,
     );
 
+    // Create a container
     let doesContainerExists = false;
     try {
       doesContainerExists = await this._doesContainerExist(
-        serviceURL,
+        blobServiceClient,
         perRequestOptions.containerName,
       );
     } catch (error) {
@@ -95,14 +93,15 @@ export class AzureStorageService {
           `Account not found: "${perRequestOptions.accountName}". Please check your "AZURE_STORAGE_ACCOUNT" value.`,
         );
       } else {
-        throw new Error(error);
+        // throw new Error(error);
       }
     }
 
     if (doesContainerExists === false) {
-      const createContainerResponse = await containerURL.create(
-        Azure.Aborter.none,
-      );
+      const _createContainerResponse = await containerClient.create({
+        abortSignal: AbortController.timeout(10 * 60 * 1000), // Abort uploading with timeout in 10mins
+      });
+
       Logger.log(
         `Container "${perRequestOptions.containerName}" created successfully`,
         APP_NAME,
@@ -115,14 +114,13 @@ export class AzureStorageService {
     }
 
     const blobName = file.originalname;
-    const blobURL = Azure.BlobURL.fromContainerURL(containerURL, blobName);
-    const blockBlobURL = Azure.BlockBlobURL.fromBlobURL(blobURL);
+    const blockBlobClient = containerClient.getBlockBlobClient(blobName);
     try {
-      const uploadBlobResponse = await blockBlobURL.upload(
-        Azure.Aborter.none,
-        buffer,
+      const uploadBlobResponse = await blockBlobClient.upload(
+        file.buffer,
         buffer.byteLength,
         {
+          abortSignal: null,
           blobHTTPHeaders: {
             blobContentType: mimetype || 'application/octet-stream',
           },
@@ -133,7 +131,7 @@ export class AzureStorageService {
       throw new Error(error);
     }
 
-    return blockBlobURL.url;
+    return blockBlobClient.url;
   }
 
   getServiceUrl(perRequestOptions: Partial<AzureStorageOptions>) {
@@ -142,28 +140,15 @@ export class AzureStorageService {
     return `https://${perRequestOptions.accountName}.blob.core.windows.net/?${perRequestOptions.sasKey}`;
   }
 
-  private async _listContainers(serviceURL: Azure.ServiceURL) {
-    let marker: string;
+  private async _listContainers(blobServiceClient: BlobServiceClient) {
     const containers = [];
-    do {
-      const listContainersResponse: Azure.Models.ServiceListContainersSegmentResponse = await serviceURL.listContainersSegment(
-        Azure.Aborter.none,
-        marker,
-      );
-
-      marker = listContainersResponse.nextMarker;
-      for (const container of listContainersResponse.containerItems) {
-        containers.push(container.name);
-      }
-    } while (marker);
-
+    for await (const container of blobServiceClient.listContainers()) {
+      containers.push(container.name);
+    }
     return containers;
   }
 
-  private async _doesContainerExist(
-    serviceURL: Azure.ServiceURL,
-    name: string,
-  ) {
-    return (await this._listContainers(serviceURL)).includes(name);
+  private async _doesContainerExist(blobServiceClient: BlobServiceClient, name: string) {
+    return (await this._listContainers(blobServiceClient)).includes(name);
   }
 }
