@@ -1,7 +1,7 @@
 import * as Azure from '@azure/storage-blob';
 import { ServiceClientOptions } from '@azure/ms-rest-js';
 
-import { Inject, Injectable, Logger } from '@nestjs/common';
+import { Inject, Injectable, Logger, Type } from '@nestjs/common';
 import { AZURE_STORAGE_MODULE_OPTIONS } from './azure-storage.constant';
 
 export const APP_NAME = 'AzureStorageService';
@@ -11,6 +11,21 @@ export interface AzureStorageOptions {
   containerName: string;
   sasKey?: string;
   clientOptions?: ServiceClientOptions;
+}
+
+export interface AzureStorageAsyncOptions {
+  useExisting?: Type<AzureStorageOptionsFactory>;
+  useClass?: Type<AzureStorageOptionsFactory>;
+  useFactory?: (
+    ...args: any[]
+  ) => Promise<AzureStorageOptions> | AzureStorageOptions;
+  inject?: any[];
+}
+
+export interface AzureStorageOptionsFactory {
+  createAzureStorageOptions():
+    | AzureStorageOptions
+    | Promise<AzureStorageOptions>;
 }
 
 export interface UploadedFileMetadata {

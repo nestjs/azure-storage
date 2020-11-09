@@ -117,6 +117,27 @@ import { AzureStorageModule } from '@nestjs/azure-storage';
 export class AppModule {}
 ```
 
+If you want to use asynchronous configuration options using factory or class,
+
+```typescript
+const storageConfigFactory = async () => {
+  sasKey: process.env['AZURE_STORAGE_SAS_KEY'],
+  accountName: process.env['AZURE_STORAGE_ACCOUNT'],
+  containerName: 'nest-demo-container',
+};
+
+@Module({
+  controllers: [AppController],
+  providers: [AppService],
+  imports: [
+    AzureStorageModule.withConfigAsync({
+      useFactory: storageConfigFactory,
+    }),
+  ],
+})
+export class AppModule {}
+```
+
 > You may provide a default `containerName` name for the whole module, this will apply to all controllers withing this module. You can also provide (override) the `containerName` in the controller, for each route.
 
 ## Story examples
