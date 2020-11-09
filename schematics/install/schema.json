@@ -31,18 +31,15 @@
       "default": false
     },
     "storageAccountName": {
-      "description": "The Azure Storage account name (see: http://bit.ly/azure-storage-account).",
+      "description": "The Azure storage account name (see: https://aka.ms/nestjs-azure-storage-account).",
       "type": "string",
-      "x-prompt": {
-        "message": "What is your Azure Storage account name (see: http://bit.ly/azure-storage-account)?",
-        "type": "string"
-      }
+      "x-prompt": "Your Azure storage account name"
     },
-    "storageAccountSAS": {
-      "description": "The Azure Storage SAS Key (see: http://bit.ly/azure-storage-sas-key).",
+    "storageAccountAccessKey": {
+      "description": "The Azure storage account SAS token or connection string (see: https://aka.ms/nestjs-azure-storage-connection-string).",
       "type": "string",
-      "x-prompt": "What is your Azure Storage SAS key (see: http://bit.ly/azure-storage-sas-key)?"
+      "x-prompt": "The Azure storage account SAS token or connection string"
     }
   },
-  "required": ["storageAccountName", "storageAccountSAS"]
+  "required": ["storageAccountName", "storageAccountAccessKey"]
 }

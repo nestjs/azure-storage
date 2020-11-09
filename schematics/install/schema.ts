@@ -26,7 +26,10 @@ export interface Schema {
   storageAccountName: string;
 
   /**
-   * The Azure Storage SAS Key.
+   * The Azure Storage access tokens:
+   * - Connection string (SAS connection string or account connection string).
+   * - SAS token.
    */
-  storageAccountSAS: string;
+  storageAccountAccessKey?: string;
+  storageAccountAccessType?: 'SASToken' | 'connectionString';
 }

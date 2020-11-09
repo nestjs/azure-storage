@@ -28,9 +28,9 @@ import { hasNestModuleImport } from '../utils/nest-module-import';
  * ```
  * imports: [
  *    AzureStorageModule.withConfig({
- *     sasKey: process.env['AZURE_STORAGE_SAS_KEY'],
- *    accountName: process.env['AZURE_STORAGE_ACCOUNT'],
- *   containerName: 'nest-demo-container',
+ *     accessKey: process.env['AZURE_STORAGE_ACCESS_KEY'],
+ *     accountName: process.env['AZURE_STORAGE_ACCOUNT'],
+ *     containerName: 'nest-demo-container',
  *    }),
  *  ],
  * ```
@@ -39,7 +39,7 @@ import { hasNestModuleImport } from '../utils/nest-module-import';
  */
 export function addAzureStorageModuleToImports(options: AzureOptions): Rule {
   return (tree: Tree, context: SchematicContext) => {
-    const MODULE_WITH_CONFIG = `AzureStorageModule.withConfig({sasKey: process.env['AZURE_STORAGE_SAS_KEY'], accountName: process.env['AZURE_STORAGE_ACCOUNT'], containerName: 'nest-demo-container' })`;
+    const MODULE_WITH_CONFIG = `AzureStorageModule.withConfig({accessKey: process.env['AZURE_STORAGE_ACCESS_KEY'], accountName: process.env['AZURE_STORAGE_ACCOUNT'], containerName: 'nest-demo-container' })`;
     const appModulePath = normalize(
       options.rootDir + `/` + options.rootModuleFileName + `.ts`,
     );
@@ -47,7 +47,7 @@ export function addAzureStorageModuleToImports(options: AzureOptions): Rule {
     // verify module has not already been imported
     if (hasNestModuleImport(tree, appModulePath, MODULE_WITH_CONFIG)) {
       return context.logger.warn(
-        `>> Skiping importing "AzureStorageModule.withConfig()" because it is already imported in "${appModulePath}".`,
+        `>> Skipping importing "AzureStorageModule.withConfig()" because it is already imported in "${appModulePath}".`,
       );
     }
 

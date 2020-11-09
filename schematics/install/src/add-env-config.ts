@@ -8,48 +8,76 @@ import {
 } from '@angular-devkit/schematics';
 import { Schema as AzureOptions } from '../schema';
 
-const AZURE_STORAGE_SAS_KEY = 'AZURE_STORAGE_SAS_KEY';
 const AZURE_STORAGE_ACCOUNT = 'AZURE_STORAGE_ACCOUNT';
-
+const AZURE_STORAGE_ACCESS_KEY = 'AZURE_STORAGE_ACCESS_KEY';
 /**
- * This will create or update the `.env` file with the `AZURE_STORAGE_ACCOUNT` and `AZURE_STORAGE_SAS_KEY` values.
- * 
+ * This will create or update the `.env` file with the `AZURE_STORAGE_ACCOUNT` and `AZURE_STORAGE_ACCESS_KEY` values.
+ *
  * @example
  * ```
- * AZURE_STORAGE_SAS_KEY=this-is-the-sas-key-value
- * AZURE_STORAGE_ACCOUNT=this-is-the-storage-account-value
+ * AZURE_STORAGE_ACCOUNT="storage-account-value"
+ * AZURE_STORAGE_ACCESS_KEY="sas-token-value-OR-connection-string"
  * ```
- * 
+ *
  * @param options The Azure arguments provided to this schematic.
  */
 export function addDotEnvConfig(options: AzureOptions): Rule {
   return (tree: Tree, context: SchematicContext) => {
     const envPath = normalize('/.env');
 
-    
-    if (options.storageAccountName === '' || options.storageAccountSAS === '') {
+    if (
+      options.storageAccountName === '' ||
+      options.storageAccountAccessKey === ''
+    ) {
       if (options.storageAccountName === '') {
-        context.logger.error('storageAccountName can not be empty.')
+        context.logger.error(
+          'The Azure storage account name can not be empty.',
+        );
       }
-      if (options.storageAccountSAS === '') {
-        context.logger.error('storageAccountSAS can not be empty.')
+      if (options.storageAccountAccessKey === '') {
+        context.logger.error(
+          'The Azure storage account SAS token (or connection string) can not be empty. ' +
+            'Read more about how to generate an access token: https://aka.ms/nestjs-azure-storage-connection-string',
+        );
       }
+      process.exit(1);
+      return null;
+    }
+
+    if (options.storageAccountAccessKey.startsWith('BlobEndpoint')) {
+      options.storageAccountAccessType = 'connectionString';
+    } else if (
+      options.storageAccountAccessKey.startsWith('?sv=') ||
+      options.storageAccountAccessKey.startsWith('sv=')
+    ) {
+      options.storageAccountAccessType = 'SASToken';
+    } else {
+      context.logger.error(
+        'The Azure storage access key must be either a SAS token or a connection string. ' +
+          'Read more: https://aka.ms/nestjs-azure-storage-connection-string',
+      );
       process.exit(1);
       return null;
     }
 
     // environment vars to add to .env file
     const newEnvFileContent =
-      `# See: http://bit.ly/azure-storage-sas-key\n` +
-      `AZURE_STORAGE_SAS_KEY="${options.storageAccountSAS}"\n` +
-      `# See: http://bit.ly/azure-storage-account\n` +
-      `AZURE_STORAGE_ACCOUNT="${options.storageAccountName}"\n`;
+      `# For more information about storage account: https://aka.ms/nestjs-azure-storage-account\n` +
+      `${AZURE_STORAGE_ACCOUNT}="${options.storageAccountName}"\n` +
+      `# For more information about storage access authorization: https://aka.ms/nestjs-azure-storage-connection-string\n` +
+      `${AZURE_STORAGE_ACCESS_KEY}="${options.storageAccountAccessKey}"\n`;
 
     const oldEnvFileContent = readEnvFile(tree, envPath);
 
     // .env file doest not exist, add one and exit
     if (!oldEnvFileContent) {
-      tree.create(envPath, newEnvFileContent);
+      if (tree.exists(envPath)) {
+        // file exists by empty
+        tree.overwrite(envPath, newEnvFileContent);
+      } else {
+        // file does not exists
+        tree.create(envPath, newEnvFileContent);
+      }
       return tree;
     }
 
@@ -64,7 +92,7 @@ export function addDotEnvConfig(options: AzureOptions): Rule {
     // if old config was detected, verify config does not already contain the required tokens
     // otherwise we exit and let the user update manually their config
     if (
-      oldEnvFileContent.includes(AZURE_STORAGE_SAS_KEY) ||
+      oldEnvFileContent.includes(AZURE_STORAGE_ACCESS_KEY) ||
       oldEnvFileContent.includes(AZURE_STORAGE_ACCOUNT)
     ) {
       return context.logger.warn(
@@ -91,7 +119,7 @@ function readEnvFile(host: Tree, fileName: string): string {
 /**
  * This rule is responsible for adding the `require('dotenv').config()` to the main.ts file.
  * The call will be added to the top of the file before any other call.
- * 
+ *
  * @example
  * ```
  * if (process.env.NODE_ENV !== 'production') require('dotenv').config();

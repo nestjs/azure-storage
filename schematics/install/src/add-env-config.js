@@ -4,28 +4,48 @@ exports.addDotEnvCall = exports.addDotEnvConfig = void 0;
 const core_1 = require("@angular-devkit/core");
 const terminal_1 = require("@angular-devkit/core/src/terminal");
 const schematics_1 = require("@angular-devkit/schematics");
-const AZURE_STORAGE_SAS_KEY = 'AZURE_STORAGE_SAS_KEY';
 const AZURE_STORAGE_ACCOUNT = 'AZURE_STORAGE_ACCOUNT';
+const AZURE_STORAGE_ACCESS_KEY = 'AZURE_STORAGE_ACCESS_KEY';
 function addDotEnvConfig(options) {
     return (tree, context) => {
         const envPath = core_1.normalize('/.env');
-        if (options.storageAccountName === '' || options.storageAccountSAS === '') {
+        if (options.storageAccountName === '' ||
+            options.storageAccountAccess === '') {
             if (options.storageAccountName === '') {
-                context.logger.error('storageAccountName can not be empty.');
+                context.logger.error('The Azure storage account name can not be empty.');
             }
-            if (options.storageAccountSAS === '') {
-                context.logger.error('storageAccountSAS can not be empty.');
+            if (options.storageAccountAccess === '') {
+                context.logger.error('The Azure storage account SAS token (or connection string) can not be empty. ' +
+                    'Read more about how to generate an access token: https://aka.ms/nestjs-azure-storage-connection-strin');
             }
             process.exit(1);
             return null;
         }
-        const newEnvFileContent = `# See: http://bit.ly/azure-storage-sas-key\n` +
-            `AZURE_STORAGE_SAS_KEY="${options.storageAccountSAS}"\n` +
-            `# See: http://bit.ly/azure-storage-account\n` +
-            `AZURE_STORAGE_ACCOUNT="${options.storageAccountName}"\n`;
+        if (options.storageAccountAccess.startsWith('BlobEndpoint')) {
+            options.storageAccountAccessType = 'connectionString';
+        }
+        else if (options.storageAccountAccess.startsWith('?sv=') ||
+            options.storageAccountAccess.startsWith('sv=')) {
+            options.storageAccountAccessType = 'SASToken';
+        }
+        else {
+            context.logger.error('The Azure storage access key must be either a SAS token or a connection string. ' +
+                'Read more: https://aka.ms/nestjs-azure-storage-connection-string');
+            process.exit(1);
+            return null;
+        }
+        const newEnvFileContent = `# For more information about storage account: https://aka.ms/nestjs-azure-storage-account\n` +
+            `${AZURE_STORAGE_ACCOUNT}="${options.storageAccountName}"\n` +
+            `# For more information about storage access authorization: https://aka.ms/nestjs-azure-storage-connection-string\n` +
+            `${AZURE_STORAGE_ACCESS_KEY}="${options.storageAccountAccess}"\n`;
         const oldEnvFileContent = readEnvFile(tree, envPath);
         if (!oldEnvFileContent) {
-            tree.create(envPath, newEnvFileContent);
+            if (tree.exists(envPath)) {
+                tree.overwrite(envPath, newEnvFileContent);
+            }
+            else {
+                tree.create(envPath, newEnvFileContent);
+            }
             return tree;
         }
         if (oldEnvFileContent === newEnvFileContent) {
@@ -33,7 +53,7 @@ function addDotEnvConfig(options) {
                 `because an ".env" file was detected and already contains these Azure Storage tokens:\n\n` +
                 terminal_1.green(`# New configuration\n` + `${newEnvFileContent}`));
         }
-        if (oldEnvFileContent.includes(AZURE_STORAGE_SAS_KEY) ||
+        if (oldEnvFileContent.includes(AZURE_STORAGE_ACCESS_KEY) ||
             oldEnvFileContent.includes(AZURE_STORAGE_ACCOUNT)) {
             return context.logger.warn(`Skipping environment variables configuration ` +
                 `because an ".env" file was detected and already contains an Azure Storage tokens.\n` +

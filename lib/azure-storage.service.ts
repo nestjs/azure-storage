@@ -1,5 +1,5 @@
-import { ServiceClientOptions } from '@azure/ms-rest-js';
 import { AbortController } from '@azure/abort-controller';
+import { ServiceClientOptions } from '@azure/ms-rest-js';
 import { AnonymousCredential, BlobServiceClient } from '@azure/storage-blob';
 import { Inject, Injectable, Logger } from '@nestjs/common';
 import { AZURE_STORAGE_MODULE_OPTIONS } from './azure-storage.constant';
@@ -9,7 +9,7 @@ export const APP_NAME = 'AzureStorageService';
 export interface AzureStorageOptions {
   accountName: string;
   containerName: string;
-  sasKey?: string;
+  accessKey: string;
   clientOptions?: ServiceClientOptions;
 }
 
@@ -46,9 +46,9 @@ export class AzureStorageService {
       );
     }
 
-    if (!perRequestOptions.sasKey) {
+    if (!perRequestOptions.accessKey) {
       throw new Error(
-        `Error encountered: "AZURE_STORAGE_SAS_KEY" was not provided.`,
+        `Error encountered: "AZURE_STORAGE_ACCESS_KEY" was not provided.`,
       );
     }
 
@@ -60,13 +60,43 @@ export class AzureStorageService {
       );
     }
 
-    const url = this.getServiceUrl(perRequestOptions);
-    const anonymousCredential = new AnonymousCredential();
-    const blobServiceClient: BlobServiceClient = new BlobServiceClient(
-      // When using AnonymousCredential, following url should include a valid SAS or support public access
-      url,
-      anonymousCredential,
-    );
+    // detect access type
+    let accessType: 'sasKey' | 'connectionString' = null;
+    if (perRequestOptions.accessKey.startsWith('BlobEndpoint')) {
+      accessType = 'connectionString';
+    } else {
+      accessType = 'sasKey';
+    }
+
+    let blobServiceClient = null;
+
+    // connection string
+    if (accessType === 'connectionString') {
+      // Create Blob Service Client from Account connection string or SAS connection string
+      // Account connection string example - `DefaultEndpointsProtocol=https;AccountName=myaccount;AccountKey=accountKey;EndpointSuffix=core.windows.net`
+      // SAS connection string example - `BlobEndpoint=https://myaccount.blob.core.windows.net/;...;SharedAccessSignature=sasString`
+      blobServiceClient = BlobServiceClient.fromConnectionString(
+        perRequestOptions.accessKey,
+      );
+    } else if (accessType === 'sasKey') {
+      // SAS key
+      // remove the first ? symbol if present
+      perRequestOptions.accessKey = perRequestOptions.accessKey.replace(
+        '?',
+        '',
+      );
+      const url = this.getServiceUrl(perRequestOptions);
+      const anonymousCredential = new AnonymousCredential();
+      blobServiceClient = new BlobServiceClient(
+        // When using AnonymousCredential, following url should include a valid SAS or support public access
+        url,
+        anonymousCredential,
+      );
+    } else {
+      throw new Error(
+        `Error encountered: Connection string or SAS Token are missing`,
+      );
+    }
 
     const containerClient = blobServiceClient.getContainerClient(
       perRequestOptions.containerName,
@@ -135,9 +165,7 @@ export class AzureStorageService {
   }
 
   getServiceUrl(perRequestOptions: Partial<AzureStorageOptions>) {
-    // remove the first ? symbol if present
-    perRequestOptions.sasKey = perRequestOptions.sasKey.replace('?', '');
-    return `https://${perRequestOptions.accountName}.blob.core.windows.net/?${perRequestOptions.sasKey}`;
+    return `https://${perRequestOptions.accountName}.blob.core.windows.net/?${perRequestOptions.accessKey}`;
   }
 
   private async _listContainers(blobServiceClient: BlobServiceClient) {
@@ -148,7 +176,10 @@ export class AzureStorageService {
     return containers;
   }
 
-  private async _doesContainerExist(blobServiceClient: BlobServiceClient, name: string) {
+  private async _doesContainerExist(
+    blobServiceClient: BlobServiceClient,
+    name: string,
+  ) {
     return (await this._listContainers(blobServiceClient)).includes(name);
   }
 }
