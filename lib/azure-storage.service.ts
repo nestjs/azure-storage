@@ -1,7 +1,9 @@
+import { TransferProgressEvent } from '@azure/core-http';
 import { Inject, Injectable, Logger } from '@nestjs/common';
 import { AZURE_STORAGE_MODULE_OPTIONS } from './azure-storage.constant';
 import * as Azure from '@azure/storage-blob';
 import {DefaultAzureCredential} from '@azure/identity';
+import Stream, { Readable } from 'stream';
 
 export const APP_NAME = 'AzureStorageService';
 
@@ -25,7 +27,7 @@ export interface UploadedFileMetadata {
 
 export interface AzureFileToUpload {
   name: string;
-  buffer: Buffer;
+  buffer: Readable | Buffer;
   size: number;
 }
 export type AzureDownloadFile = string;
@@ -55,13 +57,28 @@ export class AzureStorageService {
     this.blobClient = this.getClient(options);
   }
   
+  async progressDownload(storageUrl: string, perRequestOptions: Partial<AzureStorageOptions> = {}, progressCallBack: (progress) => void): Promise<Buffer> {
+    const blobDownloadData = this.parseStorageUrl(storageUrl);
+  
+    const urlOptions = this.mergeWithDefaultOptions(blobDownloadData);
+    const requestOptions = Object.assign(this.mergeWithDefaultOptions(perRequestOptions), urlOptions);
+  
+    const client = this.getRequestClient(requestOptions);
+    const containerClient = await client.getContainerClient(blobDownloadData.containerName);
+    const blobClient = await containerClient.getBlockBlobClient(decodeURI(blobDownloadData.blobName));
+  
+    const downloadBlockBlobResponse = await blobClient.download(undefined, undefined, {onProgress: progressCallBack});
+    const buffer = await this.streamToBuffer(downloadBlockBlobResponse.readableStreamBody);
+    return buffer;
+    
+  }
   
   async download(storageUrl: string, perRequestOptions: Partial<AzureStorageOptions> = {},): Promise<Buffer> {
     const blobDownloadData = this.parseStorageUrl(storageUrl);
     
     const urlOptions = this.mergeWithDefaultOptions(blobDownloadData);
     const requestOptions = Object.assign(this.mergeWithDefaultOptions(perRequestOptions), urlOptions);
-    
+
     const client = this.getRequestClient(requestOptions);
     const containerClient = await client.getContainerClient(blobDownloadData.containerName);
     const blobClient = await containerClient.getBlockBlobClient(decodeURI(blobDownloadData.blobName));
@@ -71,7 +88,7 @@ export class AzureStorageService {
     return buffer;
   }
   
-  async upload(file: AzureFileToUpload, perRequestOptions: Partial<AzureStorageOptions> = {},) {
+  async upload(file: AzureFileToUpload, perRequestOptions: Partial<AzureStorageOptions> = {}, progressCallBack?: (progress: TransferProgressEvent) => void) {
     if (!file) {
       throw new TypeError('file object of AzureFileToUpload to upload must be provided');
     }
@@ -85,13 +102,14 @@ export class AzureStorageService {
       throw new TypeError('file.size must be provided');
     }
     
+    const readStreamer = file.buffer instanceof Readable ? file.buffer : Readable.from(file.buffer);
+    
     
     const requestOptions = this.mergeWithDefaultOptions(perRequestOptions);
     const client = this.getRequestClient(requestOptions);
     const containerClient = await client.getContainerClient(this.options.containerName);
     const blobClient = await containerClient.getBlockBlobClient(file.name);
-    const uploadStatus = await blobClient.upload(file.buffer, file.size);
-    
+    const uploadStatus = await blobClient.uploadStream(readStreamer, 4*1024*1024, undefined,{onProgress: progressCallBack});
     if (uploadStatus.errorCode) {
       throw new Error(uploadStatus.errorCode);
     }

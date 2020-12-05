@@ -6,6 +6,7 @@ const JAzure = jest.mock('@azure/storage-blob', () => ({
         {
           getBlockBlobClient: jest.fn().mockReturnValue({
             upload: jest.fn().mockResolvedValue('a'),
+            uploadStream: jest.fn().mockResolvedValue('a'),
             delete: jest.fn(),
             download: jest.fn().mockResolvedValue({
               readableStreamBody: Readable.from([Buffer.from('test')]),
