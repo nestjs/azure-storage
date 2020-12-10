@@ -1,47 +1,47 @@
-jest.mock('@azure/storage-blob');
+import { Readable } from 'stream';
+const JAzure = jest.mock('@azure/storage-blob', () => ({
+  BlobServiceClient: jest.fn().mockImplementation((...any: any) => {
+    return {
+      getContainerClient: jest.fn().mockReturnValue(
+        {
+          getBlockBlobClient: jest.fn().mockReturnValue({
+            upload: jest.fn().mockResolvedValue('a'),
+            uploadStream: jest.fn().mockResolvedValue('a'),
+            delete: jest.fn(),
+            download: jest.fn().mockResolvedValue({
+              readableStreamBody: Readable.from([Buffer.from('test')]),
+            }),
+          }),
+        },
+      ),
+    };
+  }),
+}));
+import {BlockBlobClient, BlockBlobUploadResponse} from '@azure/storage-blob';
 import * as Azure from '@azure/storage-blob';
+
 
 import {
   AzureStorageService,
   AzureStorageOptions,
-  UploadedFileMetadata,
+  AzureFileToUpload,
 } from './azure-storage.service';
 
+
+
+
 const buffer = Buffer.from('test');
-const file: UploadedFileMetadata = {
+const file: AzureFileToUpload = {
   buffer,
-  fieldname: 'file',
-  originalname: 'test.txt',
-  encoding: 'utf-8',
-  mimetype: 'text/plain',
-  size: buffer.length + '',
-  storageUrl: null,
+  name: 'test.txt',
+  size: buffer.length,
 };
-
-Azure.ServiceURL.prototype.listContainersSegment = (...args: any): any => {
-  return {
-    nextMarker: null,
-    containerItems: [],
-  };
-};
-
-Azure.ContainerURL.fromServiceURL = (...args: any): any => {
-  return {
-    create(...args: any) {},
-  };
-};
-
-Azure.BlockBlobURL.fromBlobURL = (...args: any): any => {
-  return {
-    upload() {},
-    url: 'FAKE_URL',
-  };
-};
-
-let storage = null;
+const downloadFileUrl = 'https://test_account.blob.core.windows.net/test_container/test.txt';
 
 describe('AzureStorageService', () => {
-  beforeEach(() => {
+  let storage: AzureStorageService = null;
+
+  beforeAll(() => {
     const options: AzureStorageOptions = {
       accountName: 'test_account',
       containerName: 'test_container',
@@ -50,81 +50,94 @@ describe('AzureStorageService', () => {
     storage = new AzureStorageService(options);
   });
 
-  it('should upload successfully when config is valid', async () => {
-    const url = await storage.upload(file);
-    expect(url).toBe('FAKE_URL');
-  });
-  it('should upload successfully when SAS key starts with ?', async () => {
-    const url = await storage.upload(file, { sasKey: '?test' });
-    expect(url).toBe('FAKE_URL');
+  describe('Uploading Files', () => {
+    it('should upload successfully when config is valid', async () => {
+      const url = await storage.upload(file);
+      expect(url).toBe(downloadFileUrl);
+    });
+
+
+    describe('Fails', () => {
+      it('should not upload successfully when no auth methods are present', async () => {
+        try {
+          await storage.upload(file, {sasKey: undefined});
+        } catch (e) {
+          return expect(e.toString()).toBe(
+            'Error: Error encountered: Neither "sasKey" nor "accountKey" nor "connectionString" was not provided.',
+          );
+        }
+
+        throw new Error('Executed without any errors when it should not have');
+      });
+
+      it('should fail upload when Storage Account name is empty', async () => {
+        try {
+          await storage.upload(file, {accountName: null});
+        } catch (e) {
+          return expect(e.toString()).toBe(
+            'Error: Error encountered: "accountName" was not provided.',
+          );
+        }
+
+        throw new Error('Executed without any errors when it should not have');
+      });
+
+      it('should fail upload when File is null', async () => {
+        try {
+          await storage.upload(null);
+        } catch (e) {
+          expect(e.toString()).toBe(
+            'TypeError: file object of AzureFileToUpload to upload must be provided',
+          );
+        }
+      });
+
+      it('should fail upload when File is without name', async () => {
+        try {
+          await storage.upload({} as any);
+        } catch (e) {
+          expect(e.toString()).toBe(
+            'TypeError: file.name must be provided',
+          );
+        }
+      });
+
+      it('should fail upload when File is without buffer', async () => {
+        try {
+          await storage.upload({name: 'a'} as any);
+        } catch (e) {
+          expect(e.toString()).toBe(
+            'TypeError: file.buffer must be provided',
+          );
+        }
+      });
+
+      it('should fail upload when File is size', async () => {
+        try {
+          await storage.upload({name: 'a', buffer: new Buffer(10)} as any);
+        } catch (e) {
+          expect(e.toString()).toBe(
+            'TypeError: file.size must be provided',
+          );
+        }
+      });
+    });
   });
 
-  it('should upload successfully when SAS key does not start with ?', async () => {
-    const url = await storage.upload(file, { sasKey: 'test' });
-    expect(url).toBe('FAKE_URL');
+  describe('Downloading blob', () => {
+    it('should download successfully when url is valid', async () => {
+      const buffer = await storage.download(downloadFileUrl);
+      expect(buffer.toString()).toBe(file.buffer.toString());
+    });
+
+    describe('Fails', () => {
+
+    });
   });
 
-  it('should fail upload when SAS key is null', async () => {
-    try {
-      await storage.upload(file, { sasKey: null });
-    } catch (e) {
-      expect(e.toString()).toBe(
-        'Error: Error encountered: "AZURE_STORAGE_SAS_KEY" was not provided.',
-      );
-    }
-  });
-  it('should fail upload when SAS key is undefined', async () => {
-    try {
-      await storage.upload(file, { sasKey: undefined });
-    } catch (e) {
-      expect(e.toString()).toBe(
-        'Error: Error encountered: "AZURE_STORAGE_SAS_KEY" was not provided.',
-      );
-    }
-  });
-  it('should fail upload when SAS key is empty string', async () => {
-    try {
-      await storage.upload(file, { sasKey: '' });
-    } catch (e) {
-      expect(e.toString()).toBe(
-        'Error: Error encountered: "AZURE_STORAGE_SAS_KEY" was not provided.',
-      );
-    }
-  });
-  it('should fail upload when Storage Account name is null', async () => {
-    try {
-      await storage.upload(file, { accountName: null });
-    } catch (e) {
-      expect(e.toString()).toBe(
-        'Error: Error encountered: "AZURE_STORAGE_ACCOUNT" was not provided.',
-      );
-    }
-  });
-  it('should fail upload when Storage Account name is undefined', async () => {
-    try {
-      await storage.upload(file, { accountName: undefined });
-    } catch (e) {
-      expect(e.toString()).toBe(
-        'Error: Error encountered: "AZURE_STORAGE_ACCOUNT" was not provided.',
-      );
-    }
-  });
-  it('should fail upload when Storage Account name is empty string', async () => {
-    try {
-      await storage.upload(file, { accountName: '' });
-    } catch (e) {
-      expect(e.toString()).toBe(
-        'Error: Error encountered: "AZURE_STORAGE_ACCOUNT" was not provided.',
-      );
-    }
-  });
-  it('should fail upload when File is null', async () => {
-    try {
-      await storage.upload(null);
-    } catch (e) {
-      expect(e.toString()).toBe(
-        "TypeError: Cannot destructure property `buffer` of 'undefined' or 'null'.",
-      );
-    }
+  describe('Delete blob', () => {
+    it('should delete successfullty when url is valid', async () => {
+      await storage.delete(downloadFileUrl);
+    });
   });
 });
