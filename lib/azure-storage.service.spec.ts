@@ -120,7 +120,7 @@ describe('AzureStorageService', () => {
   });
   it('should fail upload when File is null', async () => {
     try {
-      await storage.upload(null);
+      await storage.upload(file, null);
     } catch (e) {
       expect(e.toString()).toBe(
         "TypeError: Cannot destructure property `buffer` of 'undefined' or 'null'.",
