@@ -28,7 +28,7 @@
     "@types/jest": "^25.0.0",
     "@types/node": "11.15.0",
     "husky": "6.0.0",
-    "jest": "^25.0.0",
+    "jest": "^26.0.0",
     "lint-staged": "11.0.0",
     "mock-stdin": "^1.0.0",
     "prettier": "1.19.1",
