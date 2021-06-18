@@ -22,6 +22,9 @@
     "@nestjs/platform-express": "^6.0.0"
   },
   "devDependencies": {
+    "@angular/cdk": "^8.1.2",
+    "@commitlint/cli": "11.0.0",
+    "@commitlint/config-angular": "11.0.0",
     "@nestjs/common": "6.11.7",
     "@nestjs/core": "6.11.7",
     "@nestjs/platform-express": "6.11.7",
@@ -32,10 +35,9 @@
     "lint-staged": "10.0.7",
     "mock-stdin": "^1.0.0",
     "prettier": "1.19.1",
+    "reflect-metadata": "^0.1.12",
     "ts-jest": "^25.0.0",
     "ts-morph": "5.0.0",
-    "@angular/cdk": "^8.1.2",
-    "reflect-metadata": "^0.1.12",
     "typescript": "3.6.4"
   },
   "dependencies": {
@@ -48,8 +50,13 @@
   "schematics": "./schematics/collection.json",
   "lint-staged": {
     "*.ts": [
-      "prettier --write",
-      "git add"
+      "prettier --write"
     ]
+  },
+  "husky": {
+    "hooks": {
+      "pre-commit": "lint-staged",
+      "commit-msg": "commitlint -c .commitlintrc.json -E HUSKY_GIT_PARAMS"
+    }
   }
 }
