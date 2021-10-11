@@ -1,9 +1,8 @@
 jest.mock('@azure/storage-blob');
 import * as Azure from '@azure/storage-blob';
-
 import {
-  AzureStorageService,
   AzureStorageOptions,
+  AzureStorageService,
   UploadedFileMetadata,
 } from './azure-storage.service';
 
@@ -123,7 +122,7 @@ describe('AzureStorageService', () => {
       await storage.upload(null);
     } catch (e) {
       expect(e.toString()).toBe(
-        "TypeError: Cannot destructure property 'buffer' of 'file' as it is null."
+        "TypeError: Cannot destructure property 'buffer' of 'file' as it is null.",
       );
     }
   });
