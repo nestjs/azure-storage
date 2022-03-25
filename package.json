@@ -31,7 +31,7 @@
     "jest": "^27.0.0",
     "lint-staged": "12.3.7",
     "mock-stdin": "^1.0.0",
-    "prettier": "2.6.0",
+    "prettier": "2.6.1",
     "ts-jest": "^27.0.0",
     "ts-morph": "14.0.0",
     "@angular/cdk": "^8.1.2",
