@@ -33,7 +33,7 @@
     "mock-stdin": "^1.0.0",
     "prettier": "2.6.2",
     "ts-jest": "^27.0.0",
-    "ts-morph": "14.0.0",
+    "ts-morph": "15.0.0",
     "@angular/cdk": "^8.1.2",
     "reflect-metadata": "^0.1.12",
     "typescript": "3.6.4"
