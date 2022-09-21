@@ -35,8 +35,9 @@ Learn how to get started with [Azure table storage for NestJS](https://trilon.io
 ## Before Installation
 
 1. Create a Storage account and resource ([read more](http://bit.ly/nest_new-azure-storage-account))
-1. In the [Azure Portal](https://portal.azure.com), go to **Dashboard > Storage > _your-storage-account_**.
-2. Note down the "AccountName", "AccountKey" obtained at **Access keys** and "AccountSAS" from **Shared access signature** under **Settings** tab.
+2. In the [Azure Portal](https://portal.azure.com), go to **Dashboard > Storage > _your-storage-account_**.
+3. Note down the "AccountName", "AccountKey" obtained at **Access keys** and "AccountSAS" from **Shared access signature** under **Settings** tab.
+4. (Optional) Install the [azurite](https://www.npmjs.com/package/azurite) package to setup a development environment.
 
 ## (Recommended) Installation and automatic configuration
 
@@ -63,8 +64,10 @@ Other available flags:
 - `rootModuleClassName` - the name of the root module class, default: `AppModule`
 - `mainFileName` - Application main file, default: `main`
 - `skipInstall` - skip installing dependencies, default: `false`
+- `serviceUrlProvider` - override the default service url provider (which is pointing to `https://${options.accountName}.blob.core.windows.net/?${options.sasKey}`)
 - `storageAccountName` (required) - The Azure Storage account name (see: http://bit.ly/azure-storage-account)
 - `storageAccountSAS` (required) - The Azure Storage SAS Key (see: http://bit.ly/azure-storage-sas-key).
+
 
 ## (Option 2) Manual configuration
 
@@ -140,7 +143,7 @@ export class AppModule {}
 
 > You may provide a default `containerName` name for the whole module, this will apply to all controllers withing this module. You can also provide (override) the `containerName` in the controller, for each route.
 
-## Story examples
+## Storage examples
 
 ### Store a file using the default container name
 
@@ -242,6 +245,66 @@ export class AppController {
     const storageUrl = await this.azureStorage.upload(file);
     Logger.log(`Storage URL: ${storageUrl}`, 'AppController');
   }
+}
+```
+
+### Download a file from the originalname
+
+```typescript
+import { AzureStorageService } from '@nestjs/azure-storage';
+import { Injectable } from '@nestjs/common';
+
+@Injectable()
+export class TestService {
+    constructor(
+        readonly storage: AzureStorageService
+    ) {
+        storage.getContainerClient().getBlobClient(file.originalname).downloadToBuffer().then(buffer => {
+            buffer.toString() // content of foo-bar.txt
+        });
+    }
+}
+```
+
+## Development
+You can setup a **development environment** using the default configuration from [azurite](https://www.npmjs.com/package/azurite).
+This example also shows you how to use the library with a AccountKEY instead of SAS configuration, this is **not recommended for production**.
+```typescript
+import {
+    SASProtocol,
+    StorageSharedKeyCredential,
+    generateAccountSASQueryParameters,
+    AccountSASResourceTypes,
+    AccountSASServices,
+    AccountSASPermissions
+} from "@azure/storage-blob";
+import {Module} from "@nestjs/common";
+import {AzureStorageModule} from "@nestjs/azure-storage";
+
+@Module({
+    imports: [
+        AzureStorageModule.withConfig({
+            containerName: "container",
+            accountName: "devstoreaccount1",
+            serviceUrlProvider: (options) => {
+                return `http://127.0.0.1:10000/${options.accountName}/?${options.sasKey}`
+            },
+            sasKey: generateAccountSASQueryParameters({
+                resourceTypes: AccountSASResourceTypes.parse("sco").toString(),
+                services: AccountSASServices.parse("b").toString(),
+                permissions: AccountSASPermissions.parse("racwdl"),
+                startsOn: new Date(Date.now() - 86400),
+                expiresOn: new Date(Date.now() + 86400),
+                protocol: SASProtocol.HttpsAndHttp
+            }, new StorageSharedKeyCredential(...Object.values({
+                accountName: 'devstoreaccount1',
+                accountKey: 'Eby8vdM02xNOcqFlqUwJPLlmEtlCDXJ1OUzFT50uSRZ6IFsuFq2UVErCz4I6tq/K1SZFPTOtr/KBHBeksoGMGw=='
+            }) as [string, string])).toString(),
+        })
+    ]
+})
+export class AppModule {
+
 }
 ```
 

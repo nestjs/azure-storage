@@ -117,7 +117,7 @@ function isModuleCallExpression(callExpression: ts.CallExpression): boolean {
  */
 function resolveIdentifierOfExpression(
   expression: ts.Expression,
-): ts.Identifier | null {
+): ts.Identifier | ts.PrivateIdentifier | null {
   if (ts.isIdentifier(expression)) {
     return expression;
   } else if (ts.isPropertyAccessExpression(expression)) {

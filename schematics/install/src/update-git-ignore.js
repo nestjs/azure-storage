@@ -1,5 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.updateGitIgnore = void 0;
 function updateGitIgnore(options) {
     return (tree, context) => {
         const gitIgnorePath = `.gitignore`;

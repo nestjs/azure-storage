@@ -1,11 +1,17 @@
 {
   "name": "@nestjs/azure-storage",
-  "version": "3.0.0",
+  "version": "3.1.0",
   "description": "An Azure Storage module for Nest framework (node.js)",
   "license": "MIT",
   "author": "Wassim Chegham",
   "scripts": {
-    "test": "jest",
+    "test": "run-s unittest functiontest",
+    "unittest": "jest",
+    "functiontest": "run-s functiontest:start functiontest:cleanup",
+    "functiontest:start": "run-p --race functiontest:emulator functiontest:execute",
+    "functiontest:emulator": "azurite-blob --location ./blob --debug ./blob/blob.log",
+    "functiontest:execute": "ts-node ./fulltest/main.ts",
+    "functiontest:cleanup": "rimraf ./blob",
     "precommit": "lint-staged",
     "prettier": "prettier src/**/*.ts --write && git status",
     "build": "npm run build:lib && npm run build:schematics && npm test",
@@ -22,27 +28,33 @@
     "@nestjs/platform-express": "^8.0.0"
   },
   "devDependencies": {
+    "@angular/cdk": "8.1.2",
     "@nestjs/common": "8.4.7",
     "@nestjs/core": "8.4.7",
     "@nestjs/platform-express": "8.4.7",
     "@types/jest": "^25.0.0",
     "@types/node": "14.17.11",
+    "azurite": "^3.19.0",
     "husky": "8.0.1",
     "jest": "^27.0.0",
     "lint-staged": "13.0.3",
     "mock-stdin": "^1.0.0",
+    "npm-run-all": "^4.1.5",
     "prettier": "2.7.1",
+    "reflect-metadata": "^0.1.12",
     "ts-jest": "^27.0.0",
     "ts-morph": "15.1.0",
-    "@angular/cdk": "^8.1.2",
-    "reflect-metadata": "^0.1.12",
-    "typescript": "3.6.4"
+    "ts-node": "^9.1.1",
+    "rimraf": "^3.0.2",
+    "typescript": "3.9.10",
+    "rxjs": "7.5.6"
   },
   "dependencies": {
     "@angular-devkit/schematics": "8.3.29",
-    "@schematics/angular": "8.3.29",
     "@angular/cdk": "8.2.3",
-    "@azure/storage-blob": "10.5.0"
+    "@azure/ms-rest-js": "2.6.2",
+    "@azure/storage-blob": "12.11.0",
+    "@schematics/angular": "8.3.29"
   },
   "main": "./dist/index.js",
   "schematics": "./schematics/collection.json",
@@ -51,5 +63,10 @@
       "prettier --write",
       "git add"
     ]
+  },
+  "overrides": {
+    "@angular/common": {
+      "rxjs": "$rxjs"
+    }
   }
 }

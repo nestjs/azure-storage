@@ -1,5 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.registerOnExit = void 0;
 process.stdin.resume();
 function registerOnExit() {
     function exitHandler(options, exitCode) {
