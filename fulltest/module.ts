@@ -7,7 +7,7 @@ import {
     AccountSASPermissions
 } from "@azure/storage-blob";
 import {Module} from "@nestjs/common";
-import {AzureStorageModule} from "../dist";
+import {AzureStorageModule} from "../lib";
 
 @Module({
     imports: [

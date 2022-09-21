@@ -1,6 +1,6 @@
 import {NestFactory} from "@nestjs/core";
 import {AppModule} from "./module";
-import {AzureStorageService, UploadedFileMetadata} from "../dist";
+import {AzureStorageService, UploadedFileMetadata} from "../lib";
 import {readdir} from "fs";
 import {join} from "path";
 
