@@ -28,7 +28,7 @@
     "@nestjs/platform-express": "^8.0.0"
   },
   "devDependencies": {
-    "@angular/cdk": "^8.1.2",
+    "@angular/cdk": "8.1.2",
     "@nestjs/common": "8.4.7",
     "@nestjs/core": "8.4.7",
     "@nestjs/platform-express": "8.4.7",
@@ -44,9 +44,10 @@
     "reflect-metadata": "^0.1.12",
     "ts-jest": "^27.0.0",
     "ts-morph": "15.1.0",
-    "ts-node": "^10.9.1",
+    "ts-node": "^9.1.1",
     "rimraf": "^3.0.2",
-    "typescript": "3.6.4"
+    "typescript": "3.9.10",
+    "rxjs": "7.5.6"
   },
   "dependencies": {
     "@angular-devkit/schematics": "8.3.29",
@@ -62,5 +63,10 @@
       "prettier --write",
       "git add"
     ]
+  },
+  "overrides": {
+    "@angular/common": {
+      "rxjs": "$rxjs"
+    }
   }
 }
