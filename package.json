@@ -17,32 +17,32 @@
     "publish:next": "npm publish --access public --tag next"
   },
   "peerDependencies": {
-    "@nestjs/common": "^8.0.0",
-    "@nestjs/core": "^8.0.0",
-    "@nestjs/platform-express": "^8.0.0"
+    "@nestjs/common": "^8.0.0 || ^9.0.2",
+    "@nestjs/core": "^8.0.0 || ^9.0.2",
+    "@nestjs/platform-express": "^8.0.0 || ^9.0.2"
   },
   "devDependencies": {
     "@nestjs/common": "8.4.7",
     "@nestjs/core": "8.4.7",
     "@nestjs/platform-express": "8.4.7",
-    "@types/jest": "^25.0.0",
-    "@types/node": "14.17.11",
+    "@types/jest": "^28.1.4",
+    "@types/node": "18.0.3",
     "husky": "8.0.1",
-    "jest": "^27.0.0",
+    "jest": "^28.1.2",
     "lint-staged": "13.0.3",
     "mock-stdin": "^1.0.0",
     "prettier": "2.7.1",
-    "ts-jest": "^27.0.0",
+    "ts-jest": "^28.0.5",
     "ts-morph": "15.1.0",
-    "@angular/cdk": "^8.1.2",
-    "reflect-metadata": "^0.1.12",
-    "typescript": "3.6.4"
+    "@angular/cdk": "^14.0.4",
+    "reflect-metadata": "^0.1.13",
+    "typescript": "4.7.4"
   },
   "dependencies": {
-    "@angular-devkit/schematics": "8.3.29",
-    "@schematics/angular": "8.3.29",
+    "@angular-devkit/schematics": "14.0.5",
+    "@schematics/angular": "14.0.5",
     "@angular/cdk": "8.2.3",
-    "@azure/storage-blob": "10.5.0"
+    "@azure/storage-blob": "12.11.0"
   },
   "main": "./dist/index.js",
   "schematics": "./schematics/collection.json",
