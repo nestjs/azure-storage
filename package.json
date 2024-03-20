@@ -34,14 +34,14 @@
     "prettier": "2.7.1",
     "ts-jest": "^28.0.5",
     "ts-morph": "15.1.0",
-    "@angular/cdk": "^14.0.4",
+    "@angular/cdk": "^17.0.0",
     "reflect-metadata": "^0.1.13",
     "typescript": "4.7.4"
   },
   "dependencies": {
     "@angular-devkit/schematics": "14.0.5",
     "@schematics/angular": "14.0.5",
-    "@angular/cdk": "8.2.3",
+    "@angular/cdk": "17.3.1",
     "@azure/storage-blob": "12.11.0"
   },
   "main": "./dist/index.js",
