@@ -1,10 +1,11 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.addImportToModule = exports.getMetadataField = exports.addSymbolToNestModuleMetadata = exports.getDecoratorMetadata = void 0;
 const ast_utils_1 = require("@schematics/angular/utility/ast-utils");
 const change_1 = require("@schematics/angular/utility/change");
 const ts = require("typescript");
 function getDecoratorMetadata(source, identifier, module) {
-    const nestImportsFromNode = ast_utils_1.findNodes(source, ts.SyntaxKind.ImportDeclaration)
+    const nestImportsFromNode = (0, ast_utils_1.findNodes)(source, ts.SyntaxKind.ImportDeclaration)
         .map((node) => _nestImportsFromNode(node, source))
         .reduce((acc, current) => {
         for (const key of Object.keys(current)) {
@@ -12,7 +13,7 @@ function getDecoratorMetadata(source, identifier, module) {
         }
         return acc;
     }, {});
-    return ast_utils_1.getSourceNodes(source)
+    return (0, ast_utils_1.getSourceNodes)(source)
         .filter(node => {
         return (node.kind == ts.SyntaxKind.Decorator &&
             node.expression.kind == ts.SyntaxKind.CallExpression);
@@ -112,7 +113,7 @@ function addSymbolToNestModuleMetadata(source, ngModulePath, metadataField, symb
         if (importPath !== null) {
             return [
                 new change_1.InsertChange(ngModulePath, position, toInsert),
-                ast_utils_1.insertImport(source, ngModulePath, symbolName.replace(/\..*$/, ''), importPath),
+                (0, ast_utils_1.insertImport)(source, ngModulePath, symbolName.replace(/\..*$/, ''), importPath),
             ];
         }
         else {
@@ -176,7 +177,7 @@ function addSymbolToNestModuleMetadata(source, ngModulePath, metadataField, symb
     if (importPath !== null) {
         return [
             new change_1.InsertChange(ngModulePath, position, toInsert),
-            ast_utils_1.insertImport(source, ngModulePath, symbolName.replace(/\..*$/, ''), importPath),
+            (0, ast_utils_1.insertImport)(source, ngModulePath, symbolName.replace(/\..*$/, ''), importPath),
         ];
     }
     return [new change_1.InsertChange(ngModulePath, position, toInsert)];

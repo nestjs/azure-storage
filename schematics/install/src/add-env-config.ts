@@ -1,5 +1,5 @@
 import { normalize } from '@angular-devkit/core';
-import { green, red } from '@angular-devkit/core/src/terminal';
+import { green, red } from '../utils/colors';
 import {
   Rule,
   SchematicContext,

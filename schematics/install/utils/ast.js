@@ -1,5 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.addModuleImportToModule = exports.addModuleImportToRootModule = void 0;
 const core_1 = require("@angular-devkit/core");
 const schematics_1 = require("@angular-devkit/schematics");
 const schematics_2 = require("@angular/cdk/schematics");
@@ -7,17 +8,17 @@ const ast_utils_1 = require("./ast-utils");
 const change_1 = require("@schematics/angular/utility/change");
 function addModuleImportToRootModule(options) {
     return (host, moduleName, src) => {
-        const modulePath = core_1.normalize(options.rootDir + `/` + options.rootModuleFileName + `.ts`);
+        const modulePath = (0, core_1.normalize)(options.rootDir + `/` + options.rootModuleFileName + `.ts`);
         addModuleImportToModule(host, modulePath, moduleName, src);
     };
 }
 exports.addModuleImportToRootModule = addModuleImportToRootModule;
 function addModuleImportToModule(host, modulePath, moduleName, src) {
-    const moduleSource = schematics_2.getSourceFile(host, modulePath);
+    const moduleSource = (0, schematics_2.parseSourceFile)(host, modulePath);
     if (!moduleSource) {
         throw new schematics_1.SchematicsException(`Module not found: ${modulePath}`);
     }
-    const changes = ast_utils_1.addImportToModule(moduleSource, modulePath, moduleName, src);
+    const changes = (0, ast_utils_1.addImportToModule)(moduleSource, modulePath, moduleName, src);
     const recorder = host.beginUpdate(modulePath);
     changes.forEach(change => {
         if (change instanceof change_1.InsertChange) {
