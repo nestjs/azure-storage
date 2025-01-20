@@ -42,7 +42,7 @@
     "@angular-devkit/schematics": "14.0.5",
     "@schematics/angular": "14.0.5",
     "@angular/cdk": "8.2.3",
-    "@azure/storage-blob": "12.11.0"
+    "@azure/storage-blob": "10.5.0"
   },
   "main": "./dist/index.js",
   "schematics": "./schematics/collection.json",
