@@ -32,7 +32,7 @@
     "jest": "^28.1.2",
     "lint-staged": "13.0.3",
     "mock-stdin": "^1.0.0",
-    "prettier": "2.7.1",
+    "prettier": "2.8.8",
     "reflect-metadata": "^0.1.13",
     "ts-jest": "^28.0.5",
     "ts-morph": "15.1.0",
