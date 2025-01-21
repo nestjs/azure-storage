@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.registerOnExit = void 0;
+exports.registerOnExit = registerOnExit;
 process.stdin.resume();
 function registerOnExit() {
     function exitHandler(options, exitCode) {
@@ -18,4 +18,3 @@ function registerOnExit() {
     process.on('SIGUSR2', exitHandler.bind(null, { exit: true }));
     process.on('uncaughtException', exitHandler.bind(null, { exit: true }));
 }
-exports.registerOnExit = registerOnExit;

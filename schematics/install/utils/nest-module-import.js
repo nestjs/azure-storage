@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.hasNestModuleImport = void 0;
+exports.hasNestModuleImport = hasNestModuleImport;
 const schematics_1 = require("@angular-devkit/schematics");
 const ts = require("typescript");
 function hasNestModuleImport(tree, modulePath, className) {
@@ -25,7 +25,6 @@ function hasNestModuleImport(tree, modulePath, className) {
     }
     return false;
 }
-exports.hasNestModuleImport = hasNestModuleImport;
 function findNestModuleMetadata(rootNode) {
     const nodeQueue = [...rootNode.getChildren()];
     while (nodeQueue.length) {

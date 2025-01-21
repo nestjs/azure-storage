@@ -1,6 +1,7 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.addModuleImportToModule = exports.addModuleImportToRootModule = void 0;
+exports.addModuleImportToRootModule = addModuleImportToRootModule;
+exports.addModuleImportToModule = addModuleImportToModule;
 const core_1 = require("@angular-devkit/core");
 const schematics_1 = require("@angular-devkit/schematics");
 const schematics_2 = require("@angular/cdk/schematics");
@@ -12,7 +13,6 @@ function addModuleImportToRootModule(options) {
         addModuleImportToModule(host, modulePath, moduleName, src);
     };
 }
-exports.addModuleImportToRootModule = addModuleImportToRootModule;
 function addModuleImportToModule(host, modulePath, moduleName, src) {
     const moduleSource = (0, schematics_2.parseSourceFile)(host, modulePath);
     if (!moduleSource) {
@@ -27,4 +27,3 @@ function addModuleImportToModule(host, modulePath, moduleName, src) {
     });
     host.commitUpdate(recorder);
 }
-exports.addModuleImportToModule = addModuleImportToModule;
