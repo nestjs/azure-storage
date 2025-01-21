@@ -16,7 +16,7 @@
 
 import { normalize } from '@angular-devkit/core';
 import { SchematicsException, Tree } from '@angular-devkit/schematics';
-import { getSourceFile, typescript } from '@angular/cdk/schematics';
+import { parseSourceFile } from '@angular/cdk/schematics';
 import { addImportToModule } from './ast-utils';
 import { InsertChange } from '@schematics/angular/utility/change';
 import { Schema as AzureOptions } from '../schema';
@@ -45,7 +45,7 @@ export function addModuleImportToModule(
   moduleName: string,
   src: string,
 ) {
-  const moduleSource = getSourceFile(host, modulePath);
+  const moduleSource = parseSourceFile(host, modulePath);
 
   if (!moduleSource) {
     throw new SchematicsException(`Module not found: ${modulePath}`);

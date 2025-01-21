@@ -1,13 +1,14 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.addDotEnvCall = exports.addDotEnvConfig = void 0;
 const core_1 = require("@angular-devkit/core");
-const terminal_1 = require("@angular-devkit/core/src/terminal");
+const colors_1 = require("../utils/colors");
 const schematics_1 = require("@angular-devkit/schematics");
 const AZURE_STORAGE_SAS_KEY = 'AZURE_STORAGE_SAS_KEY';
 const AZURE_STORAGE_ACCOUNT = 'AZURE_STORAGE_ACCOUNT';
 function addDotEnvConfig(options) {
     return (tree, context) => {
-        const envPath = core_1.normalize('/.env');
+        const envPath = (0, core_1.normalize)('/.env');
         if (options.storageAccountName === '' || options.storageAccountSAS === '') {
             if (options.storageAccountName === '') {
                 context.logger.error('storageAccountName can not be empty.');
@@ -30,15 +31,15 @@ function addDotEnvConfig(options) {
         if (oldEnvFileContent === newEnvFileContent) {
             return context.logger.warn(`Skipping enviromenent variables configuration ` +
                 `because an ".env" file was detected and already contains these Azure Storage tokens:\n\n` +
-                terminal_1.green(`# New configuration\n` + `${newEnvFileContent}`));
+                (0, colors_1.green)(`# New configuration\n` + `${newEnvFileContent}`));
         }
         if (oldEnvFileContent.includes(AZURE_STORAGE_SAS_KEY) ||
             oldEnvFileContent.includes(AZURE_STORAGE_ACCOUNT)) {
             return context.logger.warn(`Skipping enviromenent variables configuration ` +
                 `because an ".env" file was detected and already contains an Azure Storage tokens.\n` +
                 `Please manually update your .env file with the following configuration:\n\n` +
-                terminal_1.red(`# Old configuration\n` + `${oldEnvFileContent}\n`) +
-                terminal_1.green(`# New configuration\n` + `${newEnvFileContent}`));
+                (0, colors_1.red)(`# Old configuration\n` + `${oldEnvFileContent}\n`) +
+                (0, colors_1.green)(`# New configuration\n` + `${newEnvFileContent}`));
         }
         const recorder = tree.beginUpdate(envPath);
         recorder.insertLeft(0, newEnvFileContent);

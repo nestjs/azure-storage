@@ -88,22 +88,22 @@ describe('Running nest add @nestjs/azure-storage in a clean project', () => {
     const invalidAzureOptions = { ...azureOptions };
     invalidAzureOptions.storageAccountName = null;
 
-    expect(() => {
-      runner.runSchematic('nest-add', invalidAzureOptions, tree);
-    }).toThrow();
+    expect(async () => {
+      await runner.runSchematicAsync('nest-add', invalidAzureOptions, tree).toPromise();
+    }).rejects.toThrow();
   });
 
   it('should validate required argument: storageAccountSAS', () => {
     const invalidAzureOptions = { ...azureOptions };
     invalidAzureOptions.storageAccountSAS = null;
 
-    expect(() => {
-      runner.runSchematic('nest-add', invalidAzureOptions, tree);
-    }).toThrow();
+    expect(async () => {
+      await runner.runSchematicAsync('nest-add', invalidAzureOptions, tree).toPromise();
+    }).rejects.toThrow();
   });
 
-  it('should create all required files', () => {
-    runner.runSchematic('nest-add', azureOptions, tree);
+  it('should create all required files', async () => {
+    await runner.runSchematicAsync('nest-add', azureOptions, tree).toPromise();
 
     expect(tree.files).toEqual([
       '/package.json',
@@ -115,8 +115,8 @@ describe('Running nest add @nestjs/azure-storage in a clean project', () => {
     expect(tree.files.length).toEqual(5);
   });
 
-  it('should add all required dependencies to package.json', () => {
-    runner.runSchematic('nest-add', azureOptions, tree);
+  it('should add all required dependencies to package.json', async () => {
+    await runner.runSchematicAsync('nest-add', azureOptions, tree).toPromise();
 
     const fileContent = JSON.parse(tree.readContent('/package.json'));
     expect(Object.keys(fileContent.dependencies).sort()).toEqual(
@@ -129,15 +129,15 @@ describe('Running nest add @nestjs/azure-storage in a clean project', () => {
     );
   });
 
-  it('should add all required dependencies to package.json even if --skipInstall is used', () => {
-    runner.runSchematic(
+  it('should add all required dependencies to package.json even if --skipInstall is used', async () => {
+    await runner.runSchematicAsync(
       'nest-add',
       {
         ...azureOptions,
         skipInstall: true,
       } as AzureOptions,
       tree,
-    );
+    ).toPromise();
 
     const fileContent = JSON.parse(tree.readContent('/package.json'));
     expect(fileContent.dependencies).toBeTruthy();
@@ -146,23 +146,23 @@ describe('Running nest add @nestjs/azure-storage in a clean project', () => {
     expect(fileContent.dependencies['dotenv']).toBeTruthy();
   });
 
-  it('should create .gitignore and add .env rules to it', () => {
-    runner.runSchematic('nest-add', azureOptions, tree);
+  it('should create .gitignore and add .env rules to it', async () => {
+    await runner.runSchematicAsync('nest-add', azureOptions, tree).toPromise();
 
     const fileContent = tree.readContent('/.gitignore');
     expect(fileContent).toContain('.env\n.env.*\n');
   });
 
-  it('should add AZURE_STORAGE_SAS_KEY and AZURE_STORAGE_ACCOUNT config to .env', () => {
-    runner.runSchematic('nest-add', azureOptions, tree);
+  it('should add AZURE_STORAGE_SAS_KEY and AZURE_STORAGE_ACCOUNT config to .env', async () => {
+    await runner.runSchematicAsync('nest-add', azureOptions, tree).toPromise();
 
     const fileContent = tree.readContent('/.env');
     expect(fileContent).toContain('AZURE_STORAGE_SAS_KEY=testing');
     expect(fileContent).toContain('AZURE_STORAGE_ACCOUNT=testing');
   });
 
-  it(`should not add the require('dotenv') call in src/main.ts`, () => {
-    runner.runSchematic('nest-add', azureOptions, tree);
+  it(`should not add the require('dotenv') call in src/main.ts`, async () => {
+    await runner.runSchematicAsync('nest-add', azureOptions, tree).toPromise();
 
     const fileContent = tree.readContent('/src/main.ts');
     expect(fileContent).not.toContain(
@@ -170,52 +170,52 @@ describe('Running nest add @nestjs/azure-storage in a clean project', () => {
     );
   });
 
-  it(`should add the @nestjs/azure-storage import in src/app.module.ts`, () => {
-    runner.runSchematic('nest-add', azureOptions, tree);
+  it(`should add the @nestjs/azure-storage import in src/app.module.ts`, async () => {
+    await runner.runSchematicAsync('nest-add', azureOptions, tree).toPromise();
 
     const fileContent = tree.readContent('/src/app.module.ts');
     expect(fileContent).toContain(AZURE_MODULE_IMPORT);
   });
 
   it(`should throw if main module is not found`, () => {
-    expect(() => {
-      runner.runSchematic(
+    expect(async () => {
+      await runner.runSchematicAsync(
         'nest-add',
         {
           ...azureOptions,
           rootModuleFileName: 'file-404',
         } as AzureOptions,
         tree,
-      );
-    }).toThrow('Could not read Nest module file: src/file-404.ts');
+      ).toPromise();
+    }).rejects.toThrow('Could not read Nest module file: src/file-404.ts');
   });
 
-  it(`should not add AzureStorageModule.withConfig(...) call if @Module() is not found`, () => {
+  it(`should not add AzureStorageModule.withConfig(...) call if @Module() is not found`, async () => {
     tree.create('/src/app.mpdule.ts', APP_MODULE_CONTENT_NO_DECORATOR);
-    runner.runSchematic('nest-add', azureOptions, tree);
+    await runner.runSchematicAsync('nest-add', azureOptions, tree).toPromise();
 
     const content = tree.readContent('/src/app.mpdule.ts');
     expect(content).toMatch(APP_MODULE_CONTENT_NO_DECORATOR);
   });
 
-  it(`should not add AzureStorageModule.withConfig(...) call if already exists`, () => {
+  it(`should not add AzureStorageModule.withConfig(...) call if already exists`, async () => {
     tree.create('/src/app.mpdule.ts', APP_MODULE_CONTENT_WITH_CONFIG);
-    runner.runSchematic('nest-add', azureOptions, tree);
+    await runner.runSchematicAsync('nest-add', azureOptions, tree).toPromise();
 
     const content = tree.readContent('/src/app.mpdule.ts');
     expect(content).toMatch(APP_MODULE_CONTENT_WITH_CONFIG);
   });
 
   describe(`should add the AzureStorageModule.withConfig(...) call in src/app.module.ts`, () => {
-    it(`when "Module.import" is empty array`, () => {
-      runner.runSchematic('nest-add', azureOptions, tree);
+    it(`when "Module.import" is empty array`, async () => {
+      await runner.runSchematicAsync('nest-add', azureOptions, tree).toPromise();
       const fileContent = tree.readContent('/src/app.module.ts');
       expect(fileContent).toContain(AZURE_MODULE_CONFIG);
     });
 
-    it('when "Module.import" is undefined', () => {
+    it('when "Module.import" is undefined', async () => {
       tree.create('/src/app.mpdule.ts', APP_MODULE_CONTENT_NO_IMPORT);
-      runner.runSchematic('nest-add', azureOptions, tree);
+      await runner.runSchematicAsync('nest-add', azureOptions, tree).toPromise();
       const fileContent = tree.readContent('/src/app.module.ts');
       expect(fileContent).toContain(AZURE_MODULE_CONFIG);
     });
@@ -232,33 +232,33 @@ describe('Running nest add @nestjs/azure-storage in a complex project', () => {
   });
 
   it('should throw if missing package.json', () => {
-    expect(() => {
-      runner.runSchematic('nest-add', azureOptions, tree);
-    }).toThrow('Could not read package.json.');
+    expect(async () => {
+      await runner.runSchematicAsync('nest-add', azureOptions, tree).toPromise();
+    }).rejects.toThrow('Path \"/package.json\" does not exist.');
   });
 
   it('should throw if missing src/app.module.ts', () => {
     tree.create('/package.json', JSON.stringify({}));
     tree.create('/src/main.ts', MAIN_FILE);
 
-    expect(() => {
-      runner.runSchematic('nest-add', azureOptions, tree);
-    }).toThrow('Could not read Nest module file: src/app.module.ts');
+    expect(async () => {
+     await runner.runSchematicAsync('nest-add', azureOptions, tree).toPromise();
+    }).rejects.toThrow('Could not read Nest module file: src/app.module.ts');
   });
 
-  it('should skipp if .env file already present', () => {
+  it('should skipp if .env file already present', async () => {
     tree.create('/package.json', JSON.stringify({}));
     tree.create('/src/main.ts', MAIN_FILE);
     tree.create('/src/app.module.ts', APP_MODULE_CONTENT);
     tree.create('/.env', 'old content');
 
-    runner.runSchematic('nest-add', azureOptions, tree);
+    await runner.runSchematicAsync('nest-add', azureOptions, tree).toPromise();
     const fileContent = tree.readContent('/.env');
     expect(fileContent).toContain('AZURE_STORAGE_SAS_KEY=testing');
     expect(fileContent).toContain('AZURE_STORAGE_ACCOUNT=testing');
   });
 
-  it('should skipp if .env file already contains the same configuration', () => {
+  it('should skipp if .env file already contains the same configuration', async () => {
     tree.create('/package.json', JSON.stringify({}));
     tree.create('/src/main.ts', MAIN_FILE);
     tree.create('/src/app.module.ts', APP_MODULE_CONTENT);
@@ -270,39 +270,39 @@ describe('Running nest add @nestjs/azure-storage in a complex project', () => {
     ].join('\n');
     tree.create('/.env', ENV_CONTENT);
 
-    runner.runSchematic('nest-add', azureOptions, tree);
+    await runner.runSchematicAsync('nest-add', azureOptions, tree).toPromise();
     const fileContent = tree.readContent('/.env');
     expect(fileContent).toMatch(ENV_CONTENT);
   });
 
-  it('should skip adding the .env file to .gitignore if .env is already present', () => {
+  it('should skip adding the .env file to .gitignore if .env is already present', async () => {
     tree.create('/package.json', JSON.stringify({}));
     tree.create('/src/main.ts', MAIN_FILE);
     tree.create('/src/app.module.ts', APP_MODULE_CONTENT);
     tree.create('/.gitignore', '.env');
-    runner.runSchematic('nest-add', azureOptions, tree);
+    await runner.runSchematicAsync('nest-add', azureOptions, tree).toPromise();
 
     const fileContent = tree.readContent('/.gitignore');
     expect(fileContent).toMatch('.env');
   });
 
-  it('should append the .env file to an existing non-empty .gitignore file', () => {
+  it('should append the .env file to an existing non-empty .gitignore file', async () => {
     tree.create('/package.json', JSON.stringify({}));
     tree.create('/src/main.ts', MAIN_FILE);
     tree.create('/src/app.module.ts', APP_MODULE_CONTENT);
     tree.create('/.gitignore', 'foo');
-    runner.runSchematic('nest-add', azureOptions, tree);
+    await runner.runSchematicAsync('nest-add', azureOptions, tree).toPromise();
 
     const fileContent = tree.readContent('/.gitignore');
     expect(fileContent).toMatch('foo\n.env\n.env.*\n');
   });
 
-  it('should append the .env file to an existing empty .gitignore file', () => {
+  it('should append the .env file to an existing empty .gitignore file', async () => {
     tree.create('/package.json', JSON.stringify({}));
     tree.create('/src/main.ts', MAIN_FILE);
     tree.create('/src/app.module.ts', APP_MODULE_CONTENT);
     tree.create('/.gitignore', '');
-    runner.runSchematic('nest-add', azureOptions, tree);
+    await runner.runSchematicAsync('nest-add', azureOptions, tree).toPromise();
 
     const fileContent = tree.readContent('/.gitignore');
     expect(fileContent).toMatch('\n.env\n.env.*\n');

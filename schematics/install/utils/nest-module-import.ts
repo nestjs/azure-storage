@@ -15,7 +15,8 @@
  */
 
 import { SchematicsException, Tree } from '@angular-devkit/schematics';
-import * as ts from 'typescript';
+import * as ts from 'typescript'
+
 
 /**
  * Whether the Angular module in the given path imports the specified module class name.
@@ -120,7 +121,7 @@ function resolveIdentifierOfExpression(
 ): ts.Identifier | null {
   if (ts.isIdentifier(expression)) {
     return expression;
-  } else if (ts.isPropertyAccessExpression(expression)) {
+  } else if (ts.isPropertyAccessExpression(expression) && ts.isIdentifier(expression.name)) {
     return expression.name;
   }
   return null;
