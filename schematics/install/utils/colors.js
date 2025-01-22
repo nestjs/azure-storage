@@ -1,13 +1,13 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.green = exports.red = exports.mapObject = void 0;
+exports.green = exports.red = void 0;
+exports.mapObject = mapObject;
 function mapObject(obj, mapper) {
     return Object.keys(obj).reduce((acc, k) => {
         acc[k] = mapper(k, obj[k]);
         return acc;
     }, {});
 }
-exports.mapObject = mapObject;
 const kColors = {
     modifiers: {
         reset: [0, 0],

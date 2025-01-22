@@ -1,6 +1,9 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.addImportToModule = exports.getMetadataField = exports.addSymbolToNestModuleMetadata = exports.getDecoratorMetadata = void 0;
+exports.getDecoratorMetadata = getDecoratorMetadata;
+exports.addSymbolToNestModuleMetadata = addSymbolToNestModuleMetadata;
+exports.getMetadataField = getMetadataField;
+exports.addImportToModule = addImportToModule;
 const ast_utils_1 = require("@schematics/angular/utility/ast-utils");
 const change_1 = require("@schematics/angular/utility/change");
 const ts = require("typescript");
@@ -15,7 +18,7 @@ function getDecoratorMetadata(source, identifier, module) {
     }, {});
     return (0, ast_utils_1.getSourceNodes)(source)
         .filter(node => {
-        return (node.kind == ts.SyntaxKind.Decorator &&
+        return (ts.isDecorator(node) &&
             node.expression.kind == ts.SyntaxKind.CallExpression);
     })
         .map(node => node.expression)
@@ -39,7 +42,6 @@ function getDecoratorMetadata(source, identifier, module) {
         expr.arguments[0].kind == ts.SyntaxKind.ObjectLiteralExpression)
         .map(expr => expr.arguments[0]);
 }
-exports.getDecoratorMetadata = getDecoratorMetadata;
 function _nestImportsFromNode(node, _sourceFile) {
     const ms = node.moduleSpecifier;
     let modulePath;
@@ -182,7 +184,6 @@ function addSymbolToNestModuleMetadata(source, ngModulePath, metadataField, symb
     }
     return [new change_1.InsertChange(ngModulePath, position, toInsert)];
 }
-exports.addSymbolToNestModuleMetadata = addSymbolToNestModuleMetadata;
 function getMetadataField(node, metadataField) {
     return (node.properties
         .filter(prop => ts.isPropertyAssignment(prop))
@@ -191,8 +192,6 @@ function getMetadataField(node, metadataField) {
             name.getText() === metadataField);
     }));
 }
-exports.getMetadataField = getMetadataField;
 function addImportToModule(source, modulePath, classifiedName, importPath) {
     return addSymbolToNestModuleMetadata(source, modulePath, 'imports', classifiedName, importPath);
 }
-exports.addImportToModule = addImportToModule;

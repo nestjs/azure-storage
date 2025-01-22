@@ -49,7 +49,7 @@ export function getDecoratorMetadata(
   return getSourceNodes(source as any)
     .filter(node => {
       return (
-        node.kind == ts.SyntaxKind.Decorator &&
+        ts.isDecorator(node) &&
         (node as any).expression.kind == ts.SyntaxKind.CallExpression
       );
     })

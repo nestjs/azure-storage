@@ -1,6 +1,7 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.addDotEnvCall = exports.addDotEnvConfig = void 0;
+exports.addDotEnvConfig = addDotEnvConfig;
+exports.addDotEnvCall = addDotEnvCall;
 const core_1 = require("@angular-devkit/core");
 const colors_1 = require("../utils/colors");
 const schematics_1 = require("@angular-devkit/schematics");
@@ -47,7 +48,6 @@ function addDotEnvConfig(options) {
         return tree;
     };
 }
-exports.addDotEnvConfig = addDotEnvConfig;
 function readEnvFile(host, fileName) {
     const buffer = host.read(fileName);
     return buffer ? buffer.toString('utf-8') : null;
@@ -73,4 +73,3 @@ function addDotEnvCall(options) {
         return tree;
     };
 }
-exports.addDotEnvCall = addDotEnvCall;
