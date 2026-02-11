@@ -37,8 +37,8 @@
     "typescript": "^5.7.0"
   },
   "dependencies": {
-    "@angular-devkit/schematics": "^19.1.0",
-    "@schematics/angular": "^19.1.0",
+    "@angular-devkit/schematics": "^21.0.0",
+    "@schematics/angular": "^21.0.0",
     "@angular/cdk": "^19.1.0",
     "@azure/storage-blob": "10.5.0"
   },
