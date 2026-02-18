@@ -39,7 +39,7 @@
   "dependencies": {
     "@angular-devkit/schematics": "^19.1.0",
     "@schematics/angular": "^19.1.0",
-    "@angular/cdk": "^19.1.0",
+    "@angular/cdk": "^21.0.0",
     "@azure/storage-blob": "10.5.0"
   },
   "main": "./dist/index.js",
