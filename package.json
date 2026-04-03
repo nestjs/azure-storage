@@ -34,7 +34,7 @@
     "prettier": "3.8.1",
     "reflect-metadata": "^0.2.0",
     "ts-jest": "^29.0.0",
-    "typescript": "^5.7.0"
+    "typescript": "^6.0.0"
   },
   "dependencies": {
     "@angular-devkit/schematics": "^19.1.0",
