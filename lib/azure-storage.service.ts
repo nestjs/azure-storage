@@ -34,7 +34,7 @@ export interface UploadedFileMetadata {
   encoding: string;
   mimetype: string;
   buffer: Buffer;
-  size: string;
+  size: number;
   storageUrl?: string;
 }
 
