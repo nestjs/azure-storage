@@ -13,7 +13,7 @@ const file: UploadedFileMetadata = {
   originalname: 'test.txt',
   encoding: 'utf-8',
   mimetype: 'text/plain',
-  size: buffer.length + '',
+  size: buffer.length,
   storageUrl: null,
 };
 
